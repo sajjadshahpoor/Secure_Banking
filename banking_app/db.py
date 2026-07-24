@@ -13,6 +13,8 @@ from cryptography.fernet import Fernet
 from flask import current_app, g
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from .email_utils import send_security_alert
+
 BRUSSELS_TZ = ZoneInfo("Europe/Brussels")
 
 SCHEMA_SQL = """
@@ -551,6 +553,10 @@ def record_security_event(
             _utc_now(),
         ),
     )
+
+    alert_recipient = current_app.config.get("SECURITY_ALERT_EMAIL")
+    if alert_recipient:
+        send_security_alert(alert_recipient, event_type, severity, description, source_ip, target_resource)
 
 
 def record_logout(user_id: str, ip_address: Optional[str] = None, user_agent: Optional[str] = None) -> None:

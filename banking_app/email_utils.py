@@ -95,6 +95,27 @@ def send_password_reset_otp(recipient: str, otp: str) -> bool:
     return send_email(recipient, subject, body)
 
 
+def send_security_alert(
+    recipient: str,
+    event_type: str,
+    severity: str,
+    description: str,
+    source_ip: str | None,
+    target_resource: str | None,
+) -> bool:
+    subject = f"[SOC Alert - {severity}] {event_type}"
+    body = (
+        f"The SOC detected a new security event.\n\n"
+        f"Severity: {severity}\n"
+        f"Event: {event_type}\n"
+        f"Source IP: {source_ip or 'unknown'}\n"
+        f"Target: {target_resource or 'n/a'}\n\n"
+        f"Details:\n{description}\n\n"
+        "View it on the SOC dashboard at /soc."
+    )
+    return send_email(recipient, subject, body)
+
+
 def send_support_message(recipient: str, name: str, sender_email: str, subject: str, body_text: str) -> bool:
     """Forward a "Send Us A Message" contact-form submission to the admin
     inbox. Reply-To is set to the customer's own address, so replying to the
