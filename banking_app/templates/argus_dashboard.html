@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ARGUS Security Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy-dark: #06152c;
+            --navy: #0b2345;
+            --blue: #0754b8;
+            --blue-light: #8fc5ff;
+            --background: #f4f7fb;
+            --card: #ffffff;
+            --text: #152238;
+            --muted: #657184;
+            --danger: #e32626;
+            --warning: #ff7900;
+            --success: #209b68;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family:
+                Inter,
+                "Segoe UI",
+                Arial,
+                Helvetica,
+                sans-serif;
+        }
+
+        /* =========================
+           ARGUS HEADER
+           ========================= */
+
+        .argus-header {
+            position: relative;
+            overflow: hidden;
+            min-height: 340px;
+            padding: 45px 30px 38px;
+            color: white;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    rgba(15, 73, 145, 0.24),
+                    transparent 52%
+                ),
+                linear-gradient(
+                    135deg,
+                    #061326 0%,
+                    #071a35 52%,
+                    #051226 100%
+                );
+        }
+
+        .argus-header::before,
+        .argus-header::after {
+            content: "";
+            position: absolute;
+            width: 420px;
+            height: 240px;
+            top: 55px;
+            opacity: 0.28;
+
+            background-image:
+                linear-gradient(
+                    90deg,
+                    transparent 0 10%,
+                    #1675e8 10% 10.8%,
+                    transparent 10.8% 24%,
+                    #1675e8 24% 24.8%,
+                    transparent 24.8% 100%
+                );
+
+            pointer-events: none;
+        }
+
+        .argus-header::before {
+            left: -220px;
+            transform: skewY(18deg);
+        }
+
+        .argus-header::after {
+            right: -220px;
+            transform: scaleX(-1) skewY(18deg);
+        }
+
+        .brand-wrapper {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .argus-logo {
+            width: 155px;
+            height: 180px;
+            flex-shrink: 0;
+
+            filter:
+                drop-shadow(
+                    0 0 10px rgba(90, 160, 255, 0.25)
+                )
+                drop-shadow(
+                    0 8px 18px rgba(0, 0, 0, 0.35)
+                );
+        }
+
+        .brand-copy {
+            min-width: 0;
+        }
+
+        .argus-name {
+            font-family:
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            font-size: clamp(58px, 7vw, 100px);
+            line-height: 0.95;
+            font-weight: 300;
+            letter-spacing: 12px;
+            color: #ffffff;
+
+            text-shadow:
+                0 4px 18px rgba(0, 0, 0, 0.35);
+        }
+
+        .engine-subtitle {
+            margin-top: 18px;
+            color: #b9d8ff;
+            font-size: clamp(17px, 2vw, 25px);
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .dashboard-label {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+            max-width: 610px;
+            margin: 28px auto 0;
+            color: #8fc5ff;
+            font-size: 20px;
+            font-weight: 400;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        .dashboard-label::before,
+        .dashboard-label::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(41, 128, 232, 0.8)
+                );
+        }
+
+        .dashboard-label::after {
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(41, 128, 232, 0.8),
+                    transparent
+                );
+        }
+
+        /* =========================
+           DASHBOARD CONTENT
+           ========================= */
+
+        .container {
+            width: min(94%, 1450px);
+            margin: 0 auto;
+            padding: 46px 0 60px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(210px, 1fr));
+            gap: 24px;
+            margin-bottom: 38px;
+        }
+
+        .card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 185px;
+            padding: 30px;
+            background: var(--card);
+            border: 1px solid rgba(10, 39, 80, 0.05);
+            border-radius: 16px;
+
+            box-shadow:
+                0 12px 28px rgba(16, 42, 79, 0.08),
+                0 2px 6px rgba(16, 42, 79, 0.04);
+        }
+
+        .card h3 {
+            margin-bottom: 16px;
+            color: var(--muted);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .value {
+            color: #064ea9;
+            font-size: 52px;
+            line-height: 1;
+            font-weight: 700;
+        }
+
+        .threat-overview {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .threat-level {
+            font-size: 31px;
+            line-height: 1;
+            letter-spacing: 1px;
+        }
+
+        .threat-score {
+            color: var(--muted);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .card-icon {
+            display: grid;
+            place-items: center;
+            width: 66px;
+            height: 66px;
+            margin-left: 15px;
+            border-radius: 50%;
+            font-size: 31px;
+        }
+
+        .icon-events {
+            color: #0754b8;
+            background: #e7f0ff;
+        }
+
+        .icon-threat {
+            color: var(--danger);
+            background: #ffe8e8;
+        }
+
+        .icon-trigger {
+            color: var(--success);
+            background: #e6f6ef;
+        }
+
+        .icon-overview {
+            color: #607c9f;
+            background: #eaf0f8;
+        }
+
+        /* =========================
+           EVENT TABLE
+           ========================= */
+
+        .table-wrapper {
+            overflow-x: auto;
+            background: white;
+            border-radius: 16px;
+
+            box-shadow:
+                0 12px 28px rgba(16, 42, 79, 0.08),
+                0 2px 6px rgba(16, 42, 79, 0.04);
+        }
+
+        table {
+            width: 100%;
+            min-width: 1050px;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            background:
+                linear-gradient(
+                    90deg,
+                    #073f99,
+                    #0758bd,
+                    #073f99
+                );
+        }
+
+        th {
+            padding: 21px 18px;
+            color: white;
+            font-size: 17px;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        td {
+            padding: 25px 18px;
+            border-bottom: 1px solid #e8edf4;
+            font-size: 16px;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        .event-time {
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .event-name {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .event-ip,
+        .event-endpoint {
+            white-space: nowrap;
+        }
+
+        .high,
+        .medium,
+        .low {
+            font-weight: 700;
+        }
+
+        .high {
+            color: var(--danger);
+        }
+
+        .medium {
+            color: var(--warning);
+        }
+
+        .low {
+            color: var(--success);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            padding: 45px 20px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .empty-state strong {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-size: 18px;
+        }
+
+        /* =========================
+           RESPONSIVE DESIGN
+           ========================= */
+
+        @media (max-width: 1050px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .argus-header {
+                min-height: auto;
+                padding: 35px 22px 32px;
+            }
+
+            .brand-wrapper {
+                gap: 17px;
+            }
+
+            .argus-logo {
+                width: 86px;
+                height: 105px;
+            }
+
+            .argus-name {
+                font-size: 42px;
+                letter-spacing: 6px;
+            }
+
+            .engine-subtitle {
+                margin-top: 10px;
+                font-size: 15px;
+                white-space: normal;
+            }
+
+            .dashboard-label {
+                gap: 12px;
+                margin-top: 24px;
+                font-size: 13px;
+                letter-spacing: 3px;
+            }
+
+            .container {
+                width: 96%;
+                padding-top: 32px;
+            }
+
+            .cards {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+                gap: 14px;
+            }
+
+            .card {
+                min-height: 145px;
+                padding: 20px;
+            }
+
+            .card h3 {
+                font-size: 15px;
+            }
+
+            .value {
+                font-size: 40px;
+            }
+
+            .card-icon {
+                display: none;
+            }
+        }
+
+        @media (max-width: 470px) {
+            .brand-wrapper {
+                align-items: center;
+            }
+
+            .argus-logo {
+                width: 70px;
+                height: 88px;
+            }
+
+            .argus-name {
+                font-size: 34px;
+                letter-spacing: 4px;
+            }
+
+            .engine-subtitle {
+                font-size: 13px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="argus-header">
+
+    <div class="brand-wrapper">
+
+        <svg
+            class="argus-logo"
+            viewBox="0 0 180 210"
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label="ARGUS shield and eye logo"
+        >
+            <defs>
+                <linearGradient
+                    id="shieldGradient"
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="1"
+                >
+                    <stop
+                        offset="0%"
+                        stop-color="#ffffff"
+                    />
+
+                    <stop
+                        offset="45%"
+                        stop-color="#d6e7ff"
+                    />
+
+                    <stop
+                        offset="100%"
+                        stop-color="#79b8ff"
+                    />
+                </linearGradient>
+
+                <linearGradient
+                    id="eyeGradient"
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="1"
+                >
+                    <stop
+                        offset="0%"
+                        stop-color="#dff2ff"
+                    />
+
+                    <stop
+                        offset="100%"
+                        stop-color="#4e9cff"
+                    />
+                </linearGradient>
+            </defs>
+
+            <path
+                d="M90 8
+                   C110 26 137 31 162 36
+                   V92
+                   C162 145 133 181 90 202
+                   C47 181 18 145 18 92
+                   V36
+                   C43 31 70 26 90 8Z"
+                fill="none"
+                stroke="url(#shieldGradient)"
+                stroke-width="8"
+                stroke-linejoin="round"
+            />
+
+            <path
+                d="M90 12 V56
+                   M90 32 L54 56
+                   M90 32 L126 56
+                   M24 40 L54 56
+                   M156 40 L126 56"
+                fill="none"
+                stroke="url(#shieldGradient)"
+                stroke-width="7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+
+            <path
+                d="M32 76 L51 92
+                   L36 109
+                   L56 118
+                   L43 137
+                   L90 190
+                   M148 76 L129 92
+                   L144 109
+                   L124 118
+                   L137 137
+                   L90 190"
+                fill="none"
+                stroke="url(#shieldGradient)"
+                stroke-width="7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+
+            <path
+                d="M46 88
+                   C58 68 73 59 90 59
+                   C107 59 122 68 134 88
+                   C122 108 107 117 90 117
+                   C73 117 58 108 46 88Z"
+                fill="none"
+                stroke="url(#eyeGradient)"
+                stroke-width="7"
+            />
+
+            <circle
+                cx="90"
+                cy="88"
+                r="17"
+                fill="url(#eyeGradient)"
+            />
+
+            <circle
+                cx="90"
+                cy="88"
+                r="7"
+                fill="#071a35"
+            />
+
+            <path
+                d="M90 117 V190"
+                fill="none"
+                stroke="url(#shieldGradient)"
+                stroke-width="7"
+                stroke-linecap="round"
+            />
+        </svg>
+
+        <div class="brand-copy">
+            <h1 class="argus-name">ARGUS</h1>
+
+            <p class="engine-subtitle">
+                Banking Deception &amp; Detection Engine
+            </p>
+        </div>
+
+    </div>
+
+    <div class="dashboard-label">
+        Security Dashboard
+    </div>
+
+</header>
+
+<main class="container">
+
+    <section class="cards">
+
+        <article class="card">
+            <div>
+                <h3>Total Events</h3>
+
+                <div class="value">
+                    {{ summary.total_events }}
+                </div>
+            </div>
+
+            <div class="card-icon icon-events">
+                📄
+            </div>
+        </article>
+
+        <article class="card">
+            <div>
+                <h3>High Risk Events</h3>
+
+                <div class="value">
+                    {{ summary.high_severity_events }}
+                </div>
+            </div>
+
+            <div class="card-icon icon-threat">
+                ⚠️
+            </div>
+        </article>
+
+        <article class="card">
+            <div>
+                <h3>Honeypot Triggers</h3>
+
+                <div class="value">
+                    {{ summary.honeypot_triggers }}
+                </div>
+            </div>
+
+            <div class="card-icon icon-trigger">
+                🎯
+            </div>
+        </article>
+
+        <article class="card">
+            <div>
+                <h3>Threat Overview</h3>
+
+                <div class="threat-overview">
+
+                    <div
+                        class="
+                            threat-level
+                            {{ summary.overall_threat_class }}
+                        "
+                    >
+                        {{ summary.overall_threat_level }}
+                    </div>
+
+                    <div class="threat-score">
+                        {{ summary.overall_risk_score }} / 100
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card-icon icon-overview">
+                👁
+            </div>
+        </article>
+
+    </section>
+
+    <section class="table-wrapper">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Event</th>
+                    <th>IP</th>
+                    <th>Endpoint</th>
+                    <th>Risk Score</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for event in events %}
+
+                <tr>
+                    <td class="event-time">
+                        {{
+                            event.timestamp[:19]
+                            .replace("T", " ")
+                        }}
+                    </td>
+
+                    <td class="event-name">
+                        {{ event.event_type }}
+                    </td>
+
+                    <td class="event-ip">
+                        {{ event.ip_address }}
+                    </td>
+
+                    <td class="event-endpoint">
+                        {{ event.endpoint }}
+                    </td>
+
+                    <td>
+                        {% if event.threat_score >= 60 %}
+                            <span class="high">
+                                {{ event.threat_score }}
+                            </span>
+
+                        {% elif event.threat_score >= 30 %}
+                            <span class="medium">
+                                {{ event.threat_score }}
+                            </span>
+
+                        {% else %}
+                            <span class="low">
+                                {{ event.threat_score }}
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if event.threat_score >= 60 %}
+                            <span class="status high">
+                                ⚠ Investigating
+                            </span>
+
+                        {% elif event.threat_score >= 30 %}
+                            <span class="status medium">
+                                ◉ Monitoring
+                            </span>
+
+                        {% else %}
+                            <span class="status low">
+                                ✓ Logged
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% else %}
+
+                <tr>
+                    <td
+                        colspan="6"
+                        class="empty-state"
+                    >
+                        <strong>
+                            No security events detected
+                        </strong>
+
+                        ARGUS is actively monitoring
+                        the environment.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+</main>
+
+</body>
+</html>
