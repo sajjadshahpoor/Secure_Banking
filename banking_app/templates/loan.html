@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bank of Belgium | Loans</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loan.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/account">Accounts</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/loan">Loans</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/investment">Investments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/support">Support</a></li>
+                    <li class="nav-item ms-3"><a href="/login" class="btn btn-primary px-4">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container text-center text-white">
+            <h1>Find the Right Loan For Your Future</h1>
+
+            <p>
+                Flexible lending solutions with competitive rates
+                and transparent terms.
+            </p>
+        </div>
+    </section>
+
+    <!-- LOANS -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row g-4">
+
+                <!-- PERSONAL LOAN -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card loan-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>🏠 Personal Loan</h3>
+
+                            <h2>From 4.25%</h2>
+
+                            <p>
+                                Finance your personal goals including
+                                home improvements, travel, education and more.
+                            </p>
+
+                            <ul>
+                                <li>Borrow up to €50,000</li>
+                                <li>Flexible repayment options</li>
+                                <li>Fast approval process</li>
+                                <li>No hidden charges</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Apply Now</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HOME LOAN -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card loan-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>🏡 Home Mortgage</h3>
+
+                            <h2>From 3.75%</h2>
+
+                            <p>
+                                Make your dream home a reality with
+                                our competitive mortgage solutions.
+                            </p>
+
+                            <ul>
+                                <li>Long repayment periods</li>
+                                <li>Fixed and variable rates</li>
+                                <li>Expert mortgage advice</li>
+                                <li>Secure financing</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Apply Now</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CAR LOAN -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card loan-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>🚗 Vehicle Loan</h3>
+
+                            <h2>From 4.50%</h2>
+
+                            <p>
+                                Purchase a new or used vehicle with
+                                simple and affordable financing.
+                            </p>
+
+                            <ul>
+                                <li>Quick decisions</li>
+                                <li>Flexible terms</li>
+                                <li>Competitive rates</li>
+                                <li>Easy online application</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Apply Now</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BUSINESS LOAN -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card loan-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>🏢 Business Loan</h3>
+
+                            <h2>Business Growth</h2>
+
+                            <p>
+                                Funding solutions designed for entrepreneurs
+                                and growing businesses.
+                            </p>
+
+                            <ul>
+                                <li>Working capital</li>
+                                <li>Business expansion</li>
+                                <li>Equipment financing</li>
+                                <li>Dedicated support</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Apply Now</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STUDENT LOAN -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card loan-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>🎓 Education Loan</h3>
+
+                            <h2>Student Support</h2>
+
+                            <p>
+                                Invest in education with affordable
+                                student financing options.
+                            </p>
+
+                            <ul>
+                                <li>Flexible repayment</li>
+                                <li>Competitive interest</li>
+                                <li>Study abroad support</li>
+                                <li>Simple application</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Apply Now</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GREEN LOAN -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card loan-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>🌱 Green Loan</h3>
+
+                            <h2>Eco Financing</h2>
+
+                            <p>
+                                Support sustainable projects such as
+                                solar energy and energy-efficient homes.
+                            </p>
+
+                            <ul>
+                                <li>Green improvements</li>
+                                <li>Special rates</li>
+                                <li>Sustainable projects</li>
+                                <li>Expert guidance</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Apply Now</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">© 2026 Bank of Belgium. Secure Digital Banking.</p>
+        <p class="mb-0 mt-2">
+            <a href="{{ url_for('main.terms') }}" class="text-white-50 text-decoration-underline">Terms &amp; Conditions</a>
+            &middot;
+            <a href="{{ url_for('main.privacy') }}" class="text-white-50 text-decoration-underline">Privacy Policy</a>
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

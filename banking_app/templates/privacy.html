@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bank of Belgium | Privacy Policy</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.terms') }}">Terms &amp; Conditions</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.privacy') }}">Privacy Policy</a></li>
+                    <li class="nav-item ms-3"><a href="/login" class="btn btn-primary px-4">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="py-5">
+        <div class="container" style="max-width: 860px;">
+
+            <div class="alert alert-warning" role="alert">
+                <strong>Educational demo notice:</strong> Bank of Belgium is a fictional bank built for a
+                security-training exercise. It is not a licensed financial institution and holds no real
+                personal data beyond what you choose to enter in this demo. This page illustrates what a
+                GDPR-compliant privacy policy looks like for a Belgian bank; it is not legal advice.
+            </div>
+
+            <h1 class="fw-bold mb-1">Privacy Policy</h1>
+            <p class="text-muted mb-4">Last updated: 23 July 2026</p>
+
+            <h2 class="h4 text-primary mt-4">1. Data controller</h2>
+            <p>
+                For the purposes of the General Data Protection Regulation (EU) 2016/679 ("GDPR") and the
+                Belgian Act of 30 July 2018 on the protection of natural persons with regard to the processing
+                of personal data, the data controller is Bank of Belgium, presented for this exercise as
+                established in Belgium. You can reach us via the <a href="{{ url_for('account.dashboard') }}#support">Support</a> page.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">2. What personal data we collect</h2>
+            <ul>
+                <li><strong>Identity data:</strong> first name, last name, date of birth, username.</li>
+                <li><strong>Contact data:</strong> e-mail address, phone number, postal address.</li>
+                <li><strong>Financial data:</strong> account balances, IBANs, transaction history, card details (encrypted at rest).</li>
+                <li><strong>Security data:</strong> login history, IP addresses, audit logs, and security events, used to detect fraud and unauthorised access.</li>
+            </ul>
+
+            <h2 class="h4 text-primary mt-4">3. Why we process your data and the legal basis</h2>
+            <table class="table table-sm table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Purpose</th>
+                        <th>Legal basis (Art. 6 GDPR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Opening and operating your account, processing transfers and deposits</td>
+                        <td>Performance of a contract (Art. 6(1)(b))</td>
+                    </tr>
+                    <tr>
+                        <td>Verifying your age and identity, keeping records for audit purposes</td>
+                        <td>Legal obligation (Art. 6(1)(c))</td>
+                    </tr>
+                    <tr>
+                        <td>Fraud prevention, security monitoring, and the SOC dashboard</td>
+                        <td>Legitimate interest (Art. 6(1)(f))</td>
+                    </tr>
+                    <tr>
+                        <td>Sending you a one-time code for e-mail verification or password reset</td>
+                        <td>Performance of a contract (Art. 6(1)(b))</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 class="h4 text-primary mt-4">4. How long we keep your data</h2>
+            <p>
+                We keep account and transaction records for as long as your account is active, and, where a
+                real bank would be subject to Belgian anti-money-laundering record-keeping obligations, for a
+                further period after account closure. Security and audit logs are retained only as long as
+                needed for the purposes described above.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">5. Who we share your data with</h2>
+            <p>
+                We do not sell your personal data. In this demo, no data leaves the application; in a
+                production banking context, data may be shared with regulators, payment infrastructure
+                providers, or law enforcement where legally required.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">6. Your rights under the GDPR</h2>
+            <p>You have the right to:</p>
+            <ul>
+                <li><strong>Access</strong> the personal data we hold about you.</li>
+                <li><strong>Rectify</strong> inaccurate or incomplete data (via your <a href="{{ url_for('account.profile') }}">profile page</a>).</li>
+                <li><strong>Erase</strong> your data ("right to be forgotten"), subject to any legal retention obligations.</li>
+                <li><strong>Restrict or object</strong> to certain processing.</li>
+                <li><strong>Data portability</strong> — receive your data in a structured, machine-readable format (e.g. your <a href="{{ url_for('account.transactions') }}">transaction history</a> or account statement).</li>
+                <li><strong>Withdraw consent</strong> at any time, where processing is based on consent.</li>
+            </ul>
+            <p>
+                To exercise these rights, contact us via the <a href="{{ url_for('account.dashboard') }}#support">Support</a> page.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">7. Complaints to the supervisory authority</h2>
+            <p>
+                You have the right to lodge a complaint with the Belgian Data Protection Authority
+                (Autorité de protection des données / Gegevensbeschermingsautoriteit):
+            </p>
+            <address class="mb-0">
+                Autorité de protection des données (APD/GBA)<br>
+                Rue de la Presse 35, 1000 Brussels, Belgium<br>
+                <a href="https://www.autoriteprotectiondonnees.be" target="_blank" rel="noopener">autoriteprotectiondonnees.be</a>
+            </address>
+
+            <h2 class="h4 text-primary mt-4">8. Security</h2>
+            <p>
+                We protect your data using measures such as password hashing, multi-factor authentication,
+                encryption of sensitive fields, CSRF protection, and continuous monitoring via our Security
+                Operations Center. No system is perfectly secure, and we encourage you to also keep your own
+                credentials confidential.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">9. Changes to this policy</h2>
+            <p>
+                We may update this Privacy Policy from time to time. Material changes will be communicated to
+                you before they take effect.
+            </p>
+
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">© 2026 Bank of Belgium. Secure Digital Banking.</p>
+        <p class="mb-0 mt-2">
+            <a href="{{ url_for('main.terms') }}" class="text-white-50 text-decoration-underline">Terms &amp; Conditions</a>
+            &middot;
+            <a href="{{ url_for('main.privacy') }}" class="text-white-50 text-decoration-underline">Privacy Policy</a>
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

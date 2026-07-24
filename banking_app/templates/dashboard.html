@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bank of Belgium | Dashboard</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="/dashboard">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                    <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="menu">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="/dashboard">Dashboard</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="transactionsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Transactions
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="transactionsDropdown">
+                                <li><a class="dropdown-item" href="/transfer">Transfer</a></li>
+                                <li><a class="dropdown-item" href="/deposit">Deposit</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('account.transactions') }}">History</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('account.dashboard') }}#support">Support</a></li>
+                        {% if is_admin %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('soc.dashboard') }}">SOC</a></li>
+                        {% endif %}
+                        <li class="nav-item ms-3"><a href="/logout" class="btn btn-danger px-4">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- DASHBOARD -->
+    <section class="dashboard py-5">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div id="successToast" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+                {% for category, message in messages %}
+                <div class="toast align-items-center text-bg-{{ 'success' if category == 'success' else ('warning' if category in ['info', 'warning'] else 'danger') }} border-0 show mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body text-white">
+                            {{ message }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <h1 class="fw-bold">Welcome Back, {{ username }}</h1>
+
+            <p class="text-muted mb-5">Here is your financial overview.</p>
+
+            <!-- SUMMARY CARDS -->
+            <div class="row g-4">
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h5 class="text-primary">Total Balance</h5>
+                            <h2 class="fw-bold">€{{ "{:.2f}".format(total_balance) }}</h2>
+                            <p class="text-muted">Available balance</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h5 class="text-primary">Accounts Open</h5>
+                            <h2 class="fw-bold">{{ accounts|length }}</h2>
+                            <p class="text-muted">{{ accounts|map(attribute='account_type')|join(', ') if accounts else 'No accounts yet' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h5 class="text-primary">Member Since</h5>
+                            <h2 class="fw-bold">{{ member_since }}</h2>
+                            <p class="text-muted">Thanks for banking with us</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- MY ACCOUNTS / IBAN -->
+            <div class="row g-4 mt-1">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+
+                            <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+                                <h3 class="text-primary mb-0">My Accounts &amp; IBAN</h3>
+                                {% if available_account_types %}
+                                <button type="button" class="btn btn-outline-primary btn-sm mt-2 mt-md-0" data-bs-toggle="modal" data-bs-target="#openAccountModal">
+                                    + Open New Account
+                                </button>
+                                {% endif %}
+                            </div>
+
+                            <p class="text-muted small mb-4">
+                                Share your IBAN with someone so they can send money to you. Use their IBAN on the
+                                <a href="/transfer">Transfer</a> page to send money to them.
+                            </p>
+
+                            <div class="row g-3">
+                                {% for account in accounts %}
+                                <div class="col-md-6">
+                                    <div class="p-3 border rounded-3 h-100">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="fw-bold text-primary">{{ account['account_type'] }} Account</span>
+                                            <span class="fw-bold">€{{ "{:.2f}".format(account['balance']) }}</span>
+                                        </div>
+                                        <div class="small text-muted mb-1">IBAN</div>
+                                        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                                            <code class="fs-6 iban-value" id="iban-{{ loop.index }}">{{ account['iban'] }}</code>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-secondary copy-iban-btn"
+                                                    data-iban="{{ account['iban'] }}"
+                                                    onclick="copyIban(this)">
+                                                Copy
+                                            </button>
+                                        </div>
+                                        <div class="small text-muted">Account number: {{ account['account_number'] }}</div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="col-12">
+                                    <p class="text-muted mb-0">You don't have any accounts yet. Open one to get an IBAN.</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="row g-4 mt-4">
+
+                <!-- TRANSACTIONS -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3 class="text-primary mb-0">Recent Transactions</h3>
+                                <a href="{{ url_for('account.transactions') }}" class="btn btn-outline-primary btn-sm">View All</a>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Description</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for txn in recent_transactions %}
+                                        {% set is_self_transfer = txn['sender_account_id'] in owned_account_ids and txn['receiver_account_id'] in owned_account_ids %}
+                                        {% set is_incoming = txn['sender_account_id'] not in owned_account_ids %}
+                                        <tr>
+                                            <td>{{ txn['created_at'][:10] }}</td>
+                                            <td>{{ txn['description'] or txn['transaction_type'] }}{% if is_self_transfer %} <span class="text-muted small">(between your accounts)</span>{% endif %}</td>
+                                            <td class="fw-bold {{ 'text-muted' if is_self_transfer else ('text-success' if is_incoming else 'text-danger') }}">
+                                                {% if is_self_transfer %}€{{ "{:.2f}".format(txn['amount']) }}{% else %}{{ '+' if is_incoming else '-' }}€{{ "{:.2f}".format(txn['amount']) }}{% endif %}
+                                            </td>
+                                            <td>{{ txn['status'] }}</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">No recent transactions.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUICK ACTIONS -->
+                <div class="col-lg-4">
+
+                    {% if cards %}
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-body p-4">
+                            <h3 class="text-primary mb-4">My Card</h3>
+                            {% for card in cards %}
+                            <div class="p-4 mb-3 rounded-4 text-white card-visual">
+                                <div class="d-flex justify-content-between align-items-start mb-4">
+                                    <span class="fw-bold">{{ card['account_type'] }}</span>
+                                    <span class="fw-bold fst-italic">{{ card['card_type'] }}</span>
+                                </div>
+                                <div class="fs-4 mb-3" style="letter-spacing:2px;">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; {{ card['last_four_digits'] }}</div>
+                                <div class="d-flex justify-content-between small">
+                                    <span>{{ username }}</span>
+                                    <span>{{ "%02d"|format(card['expiry_month']) }}/{{ card['expiry_year'] }}</span>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-0">
+                                Status: <span class="{{ 'text-success' if card['status'] == 'Active' else 'text-danger' }}">{{ card['status'] }}</span>
+                                &middot; Limit: &euro;{{ "{:.2f}".format(card['credit_limit']) }}
+                            </p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3 class="text-primary mb-4">Quick Actions</h3>
+
+                            <a href="/transfer" class="btn btn-primary w-100 mb-3">Transfer Money</a>
+
+                            <a href="/deposit" class="btn btn-primary w-100 mb-3">Deposit Money</a>
+
+                            <a href="{{ url_for('account.download_statement') }}" class="btn btn-primary w-100 mb-3">Download Statement</a>
+
+                            <a href="#support" class="btn btn-primary w-100">Contact Support</a>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SECURITY -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-body p-4">
+                    <h3 class="text-primary">Security Status</h3>
+
+                    <div class="security-row">
+                        <span>
+                            <span aria-hidden="true">🔒</span> Multi-Factor Authentication
+                        </span>
+                        <span class="{{ 'text-success' if mfa_enabled else 'text-danger' }} fw-bold">
+                            {{ 'Enabled' if mfa_enabled else 'Disabled' }}
+                        </span>
+                    </div>
+
+                    <div class="security-row">
+                        <span>Last Login</span>
+                        <span class="fw-bold">{{ last_login_display }}</span>
+                    </div>
+
+                    <div class="security-row">
+                        <span>Account Alerts</span>
+                        <span class="{{ 'text-danger' if open_alerts_count else 'text-success' }} fw-bold">
+                            {{ 'No open alerts' if not open_alerts_count else (open_alerts_count|string + ' Open') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SUPPORT OPTIONS -->
+    <section id="support" class="py-3">
+        <div class="container">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5">
+
+                    <h2 class="text-primary fw-bold mb-4 text-center">Contact Support</h2>
+
+                    <div class="row text-center">
+
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="fs-1 mb-2" aria-hidden="true">📞</div>
+
+                            <h4>Call Support</h4>
+
+                            <p class="text-muted">Speak directly with our customer service team.</p>
+
+                            <h5 class="text-primary">+32 2 555 0000</h5>
+
+                            <small class="text-muted">Available 24/7</small>
+                        </div>
+
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="fs-1 mb-2" aria-hidden="true">✉️</div>
+
+                            <h4>Email Support</h4>
+
+                            <p class="text-muted">Send us your questions and receive assistance.</p>
+
+                            <h5 class="text-primary">support@bankofbelgium.com</h5>
+
+                            <small class="text-muted">Response within 24 hours</small>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="fs-1 mb-2" aria-hidden="true">💬</div>
+
+                            <h4>Live Chat</h4>
+
+                            <p class="text-muted">Chat with a banking specialist instantly.</p>
+
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('chatNotice').classList.remove('d-none')">
+                                Start Chat
+                            </button>
+                            <p id="chatNotice" class="text-muted small mt-3 d-none">
+                                Live chat is available Mon–Fri, 9:00–18:00 CET.
+                                Outside those hours, please call or email us above.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">© 2026 Bank of Belgium. Secure Digital Banking.</p>
+    </footer>
+
+    <!-- OPEN NEW ACCOUNT MODAL -->
+    {% if available_account_types %}
+    <div class="modal fade" id="openAccountModal" tabindex="-1" aria-labelledby="openAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('account.open_account') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="openAccountModalLabel">Open a New Account</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted">
+                            Choose the type of account you'd like to open. You'll get a new IBAN
+                            you can use straight away.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label" for="new_account_type">Account Type</label>
+                            <select class="form-select" id="new_account_type" name="account_type" required>
+                                {% for account_type in available_account_types %}
+                                <option value="{{ account_type }}">{{ account_type }} Account</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Open Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toastContainer = document.getElementById('successToast');
+            if (toastContainer) {
+                toastContainer.querySelectorAll('.toast').forEach(function (el) {
+                    const toast = new bootstrap.Toast(el);
+                    toast.show();
+                    setTimeout(() => toast.hide(), 4000);
+                });
+            }
+        });
+
+        function copyIban(button) {
+            const iban = button.getAttribute('data-iban');
+            const restoreLabel = button.textContent;
+
+            function showCopied() {
+                button.textContent = 'Copied!';
+                setTimeout(() => { button.textContent = restoreLabel; }, 1500);
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(iban).then(showCopied).catch(() => {
+                    fallbackCopy(iban, showCopied);
+                });
+            } else {
+                fallbackCopy(iban, showCopied);
+            }
+        }
+
+        function fallbackCopy(text, onDone) {
+            const helper = document.createElement('textarea');
+            helper.value = text;
+            helper.style.position = 'fixed';
+            helper.style.opacity = '0';
+            document.body.appendChild(helper);
+            helper.focus();
+            helper.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                // Clipboard not available; the IBAN is still visible to select manually.
+            }
+            document.body.removeChild(helper);
+            onDone();
+        }
+    </script>
+
+</body>
+
+</html>

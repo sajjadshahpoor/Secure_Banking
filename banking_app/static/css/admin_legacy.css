@@ -1,0 +1,23 @@
+body {
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    max-width: 420px;
+    margin: 80px auto;
+    color: #222;
+}
+
+.admin-error {
+    color: red;
+}
+
+input[type="text"],
+input[type="password"] {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 8px 20px;
+}

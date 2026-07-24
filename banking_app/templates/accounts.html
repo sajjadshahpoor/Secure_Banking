@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bank of Belgium | Accounts</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accounts.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/account">Accounts</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/loan">Loans</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/investment">Investments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/support">Support</a></li>
+                    <li class="nav-item ms-3"><a href="/login" class="btn btn-primary px-4">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container text-center text-white">
+            <h1>Choose the Right Account For You</h1>
+
+            <p>
+                Flexible banking solutions designed for individuals,
+                families, students and businesses.
+            </p>
+        </div>
+    </section>
+
+    <!-- ACCOUNTS -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row g-4">
+
+                <!-- CURRENT ACCOUNT -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card account-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>💳 Current Account</h3>
+
+                            <h2>€0 Monthly Fee</h2>
+
+                            <p>
+                                Perfect for everyday banking with easy payments,
+                                debit card access and online banking.
+                            </p>
+
+                            <ul>
+                                <li>Free digital banking</li>
+                                <li>Instant transfers</li>
+                                <li>Contactless payments</li>
+                                <li>Mobile banking app</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Open Account</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SAVINGS -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card account-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>🏦 Savings Account</h3>
+
+                            <h2>3.50% APY</h2>
+
+                            <p>
+                                Build your savings with competitive interest
+                                rates and secure deposits.
+                            </p>
+
+                            <ul>
+                                <li>No minimum balance</li>
+                                <li>Monthly interest payments</li>
+                                <li>Secure savings</li>
+                                <li>Easy withdrawals</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Open Account</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PREMIUM -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card account-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>⭐ Premium Savings</h3>
+
+                            <h2>4.75% APY</h2>
+
+                            <p>
+                                Designed for customers who want higher returns
+                                with premium banking benefits.
+                            </p>
+
+                            <ul>
+                                <li>Higher interest rates</li>
+                                <li>Priority support</li>
+                                <li>Dedicated advisor</li>
+                                <li>No hidden fees</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Open Account</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STUDENT -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card account-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>🎓 Student Account</h3>
+
+                            <h2>Free Banking</h2>
+
+                            <p>
+                                A simple account designed for students
+                                starting their financial journey.
+                            </p>
+
+                            <ul>
+                                <li>No monthly fees</li>
+                                <li>Free debit card</li>
+                                <li>Mobile banking</li>
+                                <li>Budget tools</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Open Account</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BUSINESS -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card account-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>🏢 Business Account</h3>
+
+                            <h2>Business Banking</h2>
+
+                            <p>
+                                Powerful banking tools for companies,
+                                entrepreneurs and organisations.
+                            </p>
+
+                            <ul>
+                                <li>Business payments</li>
+                                <li>Multiple users</li>
+                                <li>Cash management</li>
+                                <li>Financial reports</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Open Account</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INVESTMENT -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card account-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>📈 Investment Account</h3>
+
+                            <h2>Grow Wealth</h2>
+
+                            <p>
+                                Access investment solutions designed
+                                for long-term financial growth.
+                            </p>
+
+                            <ul>
+                                <li>Investment options</li>
+                                <li>Portfolio support</li>
+                                <li>Expert guidance</li>
+                                <li>Secure platform</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Open Account</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">© 2026 Bank of Belgium. Secure Digital Banking.</p>
+        <p class="mb-0 mt-2">
+            <a href="{{ url_for('main.terms') }}" class="text-white-50 text-decoration-underline">Terms &amp; Conditions</a>
+            &middot;
+            <a href="{{ url_for('main.privacy') }}" class="text-white-50 text-decoration-underline">Privacy Policy</a>
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

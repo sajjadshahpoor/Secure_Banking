@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bank of Belgium | Terms &amp; Conditions</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.terms') }}">Terms &amp; Conditions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.privacy') }}">Privacy Policy</a></li>
+                    <li class="nav-item ms-3"><a href="/login" class="btn btn-primary px-4">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="py-5">
+        <div class="container" style="max-width: 860px;">
+
+            <div class="alert alert-warning" role="alert">
+                <strong>Educational demo notice:</strong> Bank of Belgium is a fictional bank built for a
+                security-training exercise. It is not a licensed financial institution, is not supervised by the
+                National Bank of Belgium or the FSMA, and holds no real funds. This page illustrates what a
+                compliant Belgian/EU terms &amp; conditions page looks like; it is not legal advice and creates
+                no real financial obligations.
+            </div>
+
+            <h1 class="fw-bold mb-1">Terms &amp; Conditions</h1>
+            <p class="text-muted mb-4">Last updated: 23 July 2026</p>
+
+            <h2 class="h4 text-primary mt-4">1. Who we are</h2>
+            <p>
+                "Bank of Belgium", "we", "us" or "our" refers to this demo application, presented for the
+                purposes of this exercise as a bank established in Belgium. These Terms &amp; Conditions
+                govern your access to and use of our website and online banking services (the "Services").
+            </p>
+
+            <h2 class="h4 text-primary mt-4">2. Acceptance of these terms</h2>
+            <p>
+                By creating an account you confirm that you have read, understood, and agree to be bound by
+                these Terms &amp; Conditions and by our <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>.
+                If you do not agree, you must not register for or use the Services.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">3. Eligibility</h2>
+            <p>
+                You must be at least 18 years old and have full legal capacity to enter into a banking
+                relationship under Belgian law to open an account with us. We may ask you to verify your
+                identity and date of birth before or after account opening.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">4. Accounts and services</h2>
+            <p>
+                We offer Savings and Current accounts, each issued with a unique IBAN, together with related
+                services such as IBAN-to-IBAN transfers, deposits, a debit card, and downloadable account
+                statements. We may introduce, modify, or discontinue individual features at any time,
+                with reasonable notice where the change materially affects you.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">5. Fees and charges</h2>
+            <p>
+                Any fees applicable to your account (if introduced) will be disclosed to you before they take
+                effect, in line with Belgian and EU rules on price transparency for payment services (the
+                Payment Services Directive, transposed into Belgian law via the Code of Economic Law).
+            </p>
+
+            <h2 class="h4 text-primary mt-4">6. Your obligations</h2>
+            <ul>
+                <li>Provide accurate, complete, and up-to-date information when you register or update your profile.</li>
+                <li>Keep your password, MFA device, and account credentials confidential and secure.</li>
+                <li>Notify us immediately if you suspect unauthorised access to your account.</li>
+                <li>Use the Services only for lawful purposes and not to defraud us or any third party.</li>
+            </ul>
+
+            <h2 class="h4 text-primary mt-4">7. Our rights</h2>
+            <p>
+                We may suspend, restrict, or close an account where we reasonably suspect fraud, a breach of
+                these Terms, or a legal or regulatory requirement to do so, and we may monitor account activity
+                for security purposes as described in our <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">8. Liability</h2>
+            <p>
+                We are not liable for losses caused by circumstances beyond our reasonable control, or for
+                losses arising from your failure to keep your credentials secure, except where mandatory
+                Belgian or EU consumer-protection law provides otherwise.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">9. Complaints and dispute resolution</h2>
+            <p>
+                If you are unhappy with our Services, you may contact our support team first. Under Belgian
+                law, unresolved disputes involving a real bank could normally be referred to Ombudsfin, the
+                financial services ombudsman (<a href="https://www.ombudsfin.be" target="_blank" rel="noopener">ombudsfin.be</a>).
+                As this is a demo application, no real complaint-handling body applies.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">10. Governing law and jurisdiction</h2>
+            <p>
+                These Terms are governed by Belgian law. Any dispute arising from these Terms or your use of
+                the Services falls under the exclusive jurisdiction of the courts of Brussels, Belgium, without
+                prejudice to any mandatory consumer-protection rules that entitle you to bring proceedings in
+                your own place of residence.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">11. Changes to these terms</h2>
+            <p>
+                We may update these Terms from time to time. Where a change is material, we will notify you
+                (for example, by e-mail or an in-app notice) before it takes effect.
+            </p>
+
+            <h2 class="h4 text-primary mt-4">12. Contact</h2>
+            <p>
+                Questions about these Terms can be sent via the <a href="{{ url_for('account.dashboard') }}#support">Support</a>
+                page.
+            </p>
+
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">© 2026 Bank of Belgium. Secure Digital Banking.</p>
+        <p class="mb-0 mt-2">
+            <a href="{{ url_for('main.terms') }}" class="text-white-50 text-decoration-underline">Terms &amp; Conditions</a>
+            &middot;
+            <a href="{{ url_for('main.privacy') }}" class="text-white-50 text-decoration-underline">Privacy Policy</a>
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

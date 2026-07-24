@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bank of Belgium | Investments</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/investment.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/account">Accounts</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/loan">Loans</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/investment">Investments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/support">Support</a></li>
+                    <li class="nav-item ms-3"><a href="/login" class="btn btn-primary px-4">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container text-center text-white">
+            <h1>Grow Your Wealth With Confidence</h1>
+
+            <p>
+                Professional investment solutions designed
+                for your financial future.
+            </p>
+        </div>
+    </section>
+
+    <!-- INVESTMENT OPTIONS -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row g-4">
+
+                <!-- STOCKS -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card investment-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>📈 Stock Investments</h3>
+
+                            <h2>Market Growth</h2>
+
+                            <p>
+                                Invest in leading companies and build
+                                long-term wealth through global markets.
+                            </p>
+
+                            <ul>
+                                <li>Global stock access</li>
+                                <li>Professional research</li>
+                                <li>Portfolio tracking</li>
+                                <li>Flexible investing</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Start Investing</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FUNDS -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card investment-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>📊 Investment Funds</h3>
+
+                            <h2>Diversified Growth</h2>
+
+                            <p>
+                                Spread your investment across multiple
+                                assets with professionally managed funds.
+                            </p>
+
+                            <ul>
+                                <li>Risk diversification</li>
+                                <li>Expert management</li>
+                                <li>Multiple strategies</li>
+                                <li>Regular reporting</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Start Investing</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BONDS -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card investment-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>🏦 Bonds</h3>
+
+                            <h2>Stable Returns</h2>
+
+                            <p>
+                                A lower-risk investment option designed
+                                for steady income and stability.
+                            </p>
+
+                            <ul>
+                                <li>Fixed returns</li>
+                                <li>Lower volatility</li>
+                                <li>Long-term security</li>
+                                <li>Income generation</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Start Investing</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RETIREMENT -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card investment-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>👴 Retirement Plans</h3>
+
+                            <h2>Future Security</h2>
+
+                            <p>
+                                Build a comfortable retirement with
+                                structured investment planning.
+                            </p>
+
+                            <ul>
+                                <li>Personal retirement plans</li>
+                                <li>Long-term growth</li>
+                                <li>Tax-efficient options</li>
+                                <li>Expert advice</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Start Investing</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WEALTH MANAGEMENT -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card investment-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>💼 Wealth Management</h3>
+
+                            <h2>Premium Service</h2>
+
+                            <p>
+                                Personalized strategies for customers
+                                looking for advanced financial planning.
+                            </p>
+
+                            <ul>
+                                <li>Dedicated advisor</li>
+                                <li>Custom portfolios</li>
+                                <li>Investment reviews</li>
+                                <li>Financial planning</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Start Investing</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DIGITAL INVESTING -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card investment-card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h3>📱 Digital Investing</h3>
+
+                            <h2>Smart Investing</h2>
+
+                            <p>
+                                Manage your investments anytime through
+                                our secure digital platform.
+                            </p>
+
+                            <ul>
+                                <li>Online portfolio access</li>
+                                <li>Real-time updates</li>
+                                <li>Easy transactions</li>
+                                <li>Secure platform</li>
+                            </ul>
+
+                            <a href="/register" class="btn btn-primary">Start Investing</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">© 2026 Bank of Belgium. Secure Digital Banking.</p>
+        <p class="mb-0 mt-2">
+            <a href="{{ url_for('main.terms') }}" class="text-white-50 text-decoration-underline">Terms &amp; Conditions</a>
+            &middot;
+            <a href="{{ url_for('main.privacy') }}" class="text-white-50 text-decoration-underline">Privacy Policy</a>
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

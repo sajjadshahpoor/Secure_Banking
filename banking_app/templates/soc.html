@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank of Belgium | SOC Dashboard</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/soc.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="{{ url_for('soc.dashboard') }}">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                    <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="menu">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item"><a class="nav-link active" href="{{ url_for('soc.dashboard') }}">SOC</a></li>
+                        {% if has_bank_account %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('account.dashboard') }}">Dashboard</a></li>
+                        {% else %}
+                        <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#openAccountModal">Open Account</a></li>
+                        {% endif %}
+                        <li class="nav-item ms-3"><a href="{{ url_for('auth.logout') }}" class="btn btn-danger px-4">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="dashboard py-5">
+        <div class="container">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <div>
+                    <h1 class="fw-bold mb-1">Security Operations Center</h1>
+                    <p class="text-muted mb-0">Signed in as {{ current_user.email }} · Admin</p>
+                </div>
+                <span class="badge soc-live-badge">● Live monitoring</span>
+            </div>
+
+            {% if summary.honeypot_hits_open > 0 %}
+            <div class="honeypot-alert mb-4" role="alert">
+                <div class="honeypot-alert-icon">🍯🚨</div>
+                <div>
+                    <div class="honeypot-alert-title">HONEYPOT TRIGGERED</div>
+                    <div class="honeypot-alert-body">
+                        {{ summary.honeypot_hits_open }} unresolved decoy-system interaction{{ 's' if summary.honeypot_hits_open != 1 else '' }}
+                        detected ({{ summary.honeypot_hits_total }} total since launch). Someone accessed the fake
+                        backup leak and/or the decoy admin panel -- this is never legitimate traffic.
+                        See the Security Events table below for full details (filter by Critical severity).
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category if category in ['success', 'danger', 'warning'] else 'info' }}" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            {% macro page_nav(current_page, total_pages, target, aria_label) %}
+            {% if total_pages > 1 %}
+            <nav aria-label="{{ aria_label }}" class="mt-3">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    <li class="page-item {{ 'disabled' if current_page <= 1 }}">
+                        <a class="page-link" href="{{ url_for('soc.dashboard',
+                            severity=selected_severity, status=selected_status,
+                            events_page=(events_page - 1 if target == 'events' else events_page),
+                            audit_page=(audit_page - 1 if target == 'audit' else audit_page),
+                            login_page=(login_page - 1 if target == 'login' else login_page),
+                            users_page=(users_page - 1 if target == 'users' else users_page),
+                            user_search=user_search) }}">Previous</a>
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">Page {{ current_page }} of {{ total_pages }}</span></li>
+                    <li class="page-item {{ 'disabled' if current_page >= total_pages }}">
+                        <a class="page-link" href="{{ url_for('soc.dashboard',
+                            severity=selected_severity, status=selected_status,
+                            events_page=(events_page + 1 if target == 'events' else events_page),
+                            audit_page=(audit_page + 1 if target == 'audit' else audit_page),
+                            login_page=(login_page + 1 if target == 'login' else login_page),
+                            users_page=(users_page + 1 if target == 'users' else users_page),
+                            user_search=user_search) }}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+            {% endmacro %}
+
+            <!-- SUMMARY CARDS -->
+            <div class="row g-4 mb-2">
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <h6 class="text-muted text-uppercase small mb-2">Open Security Events</h6>
+                            <h2 class="fw-bold mb-0">{{ summary.open_events }}</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <h6 class="text-muted text-uppercase small mb-2">High / Critical Unresolved</h6>
+                            <h2 class="fw-bold mb-0 text-danger">{{ summary.critical_open_events }}</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <h6 class="text-muted text-uppercase small mb-2">Failed Logins (24h)</h6>
+                            <h2 class="fw-bold mb-0">{{ summary.failed_logins_24h }}</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <a href="#user-accounts" class="text-decoration-none">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body p-4">
+                                <h6 class="text-muted text-uppercase small mb-2">Locked Accounts</h6>
+                                <h2 class="fw-bold mb-0 text-dark">{{ summary.locked_accounts }}</h2>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- SECURITY EVENTS -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+                        <h3 class="text-primary mb-0">Security Events</h3>
+
+                        <form class="d-flex gap-2" method="get" action="{{ url_for('soc.dashboard') }}">
+                            <select name="severity" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="">All severities</option>
+                                {% for sev in severities %}
+                                <option value="{{ sev }}" {% if selected_severity == sev %}selected{% endif %}>{{ sev }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="">All statuses</option>
+                                {% for st in statuses %}
+                                <option value="{{ st }}" {% if selected_status == st %}selected{% endif %}>{{ st }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Event</th>
+                                    <th>Severity</th>
+                                    <th>Source IP</th>
+                                    <th>Target</th>
+                                    <th>User</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in security_events %}
+                                <tr>
+                                    <td class="text-nowrap">{{ event.created_at }}</td>
+                                    <td>{{ event.event_type }}</td>
+                                    <td><span class="badge soc-badge-{{ event.severity | lower }}">{{ event.severity }}</span></td>
+                                    <td>{{ event.source_ip or '—' }}</td>
+                                    <td>{{ event.target_resource }}</td>
+                                    <td>{{ event.user_email or '—' }}</td>
+                                    <td class="small">{{ event.description }}</td>
+                                    <td><span class="badge soc-status-{{ event.status | lower }}">{{ event.status }}</span></td>
+                                    <td class="text-nowrap">
+                                        {% if event.status != 'Closed' %}
+                                        <form method="post" action="{{ url_for('soc.update_event_status', event_id=event.id) }}" class="d-flex gap-1">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            {% if event.status == 'Open' %}
+                                            <button type="submit" name="status" value="Investigating" class="btn btn-sm btn-outline-primary">Investigate</button>
+                                            {% endif %}
+                                            <button type="submit" name="status" value="Closed" class="btn btn-sm btn-outline-secondary">Close</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">No security events recorded yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {{ page_nav(events_page, events_total_pages, 'events', 'Security events pages') }}
+
+                </div>
+            </div>
+
+            <div class="row g-4 mt-1">
+
+                <!-- LOGIN HISTORY -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <h3 class="text-primary mb-3">Login History</h3>
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>User</th>
+                                            <th>IP</th>
+                                            <th>Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entry in login_history %}
+                                        <tr>
+                                            <td class="text-nowrap">{{ entry.login_time }}</td>
+                                            <td>{{ entry.user_email or 'unknown' }}</td>
+                                            <td>{{ entry.ip_address or '—' }}</td>
+                                            <td>
+                                                {% if entry.success %}
+                                                <span class="badge bg-success">Success</span>
+                                                {% else %}
+                                                <span class="badge bg-danger">Failed</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">No login activity yet.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {{ page_nav(login_page, login_total_pages, 'login', 'Login history pages') }}
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AUDIT LOG -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <h3 class="text-primary mb-3">Audit Log</h3>
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>User</th>
+                                            <th>Action</th>
+                                            <th>Resource</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entry in audit_logs %}
+                                        <tr>
+                                            <td class="text-nowrap">{{ entry.created_at }}</td>
+                                            <td>{{ entry.user_email or 'system' }}</td>
+                                            <td>{{ entry.action }}</td>
+                                            <td>{{ entry.resource }}</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">No audit activity yet.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {{ page_nav(audit_page, audit_total_pages, 'audit', 'Audit log pages') }}
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- USER ACCOUNTS -->
+            <div class="card shadow-sm border-0 mt-4" id="user-accounts">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+                        <h3 class="text-primary mb-0">User Accounts</h3>
+
+                        <form class="d-flex gap-2" method="get" action="{{ url_for('soc.dashboard') }}">
+                            <input type="text" name="user_search" class="form-control form-control-sm" placeholder="Search name, email, username" value="{{ user_search or '' }}">
+                            <button type="submit" class="btn btn-outline-primary btn-sm">Search</button>
+                            {% if user_search %}
+                            <a href="{{ url_for('soc.dashboard') }}" class="btn btn-outline-secondary btn-sm">Clear</a>
+                            {% endif %}
+                        </form>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Name</th>
+                                    <th>Role(s)</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in users %}
+                                {% set is_locked = u.account_locked_until and u.account_locked_until > now %}
+                                <tr>
+                                    <td>{{ u.email }}</td>
+                                    <td>{{ u.first_name }} {{ u.last_name }}</td>
+                                    <td>{{ u.roles or '—' }}</td>
+                                    <td>
+                                        {% if not u.is_active %}
+                                        <span class="badge bg-danger">Deactivated</span>
+                                        {% elif is_locked %}
+                                        <span class="badge bg-warning text-dark">Locked until {{ u.account_locked_until }}</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <div class="d-flex gap-1">
+                                            {% if is_locked %}
+                                            <form method="post" action="{{ url_for('soc.unlock_user', user_id=u.id) }}">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-warning">Unlock Now</button>
+                                            </form>
+                                            {% endif %}
+                                            {% if u.is_active %}
+                                            <form method="post" action="{{ url_for('soc.deactivate_user', user_id=u.id) }}" onsubmit="return confirm('Deactivate {{ u.email }}? They will be logged out immediately and unable to log back in.');">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" {% if u.id == current_user.id %}disabled title="You can't deactivate your own account."{% endif %}>Deactivate</button>
+                                            </form>
+                                            {% else %}
+                                            <form method="post" action="{{ url_for('soc.reactivate_user', user_id=u.id) }}">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-success">Reactivate</button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">No users found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {{ page_nav(users_page, users_total_pages, 'users', 'User accounts pages') }}
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">© 2026 Bank of Belgium. Secure Digital Banking.</p>
+    </footer>
+
+    {% if not has_bank_account %}
+    <div class="modal fade" id="openAccountModal" tabindex="-1" aria-labelledby="openAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('account.open_account') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="openAccountModalLabel">Open a Bank Account</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted">
+                            Your admin login doesn't have a bank account yet. Choose an account type
+                            to open one, same as any other customer.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label" for="new_account_type">Account Type</label>
+                            <select class="form-select" id="new_account_type" name="account_type" required>
+                                {% for account_type in available_account_types %}
+                                <option value="{{ account_type }}">{{ account_type }} Account</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Open Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Back the "Live monitoring" badge with an actual periodic refresh,
+        // skipped while a modal is open so it doesn't interrupt the admin.
+        setInterval(function () {
+            if (!document.querySelector('.modal.show')) {
+                window.location.reload();
+            }
+        }, 30000);
+    </script>
+
+</body>
+
+</html>

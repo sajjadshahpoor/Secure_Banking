@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank of Belgium | Verify Email</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="container d-flex justify-content-center align-items-center">
+        <div class="login-card card border-0 shadow-lg">
+            <div class="card-body p-5">
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }}" role="alert">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                {% if error %}
+                <div class="error">{{ error }}</div>
+                {% endif %}
+
+                <h1 class="text-center mb-3">Verify Your Email</h1>
+                <p class="subtitle text-center">
+                    Enter the 6-digit code we sent to <strong>{{ email }}</strong> to activate your account.
+                </p>
+
+                <form method="POST" action="{{ url_for('auth.verify_email') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Verification Code</label>
+                        <input type="text" name="otp" class="form-control form-control-lg"
+                               placeholder="Enter 6-digit code" maxlength="6" required autofocus>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Verify Email</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('auth.resend_verification') }}" class="text-center mt-3">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-link p-0 forgot">Resend code</button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('auth.login') }}" class="forgot">Back to Login</a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

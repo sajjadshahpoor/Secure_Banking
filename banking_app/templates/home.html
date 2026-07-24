@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bank of Belgium | Banking Made Simple</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header>
+        <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                    <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="menu">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/account">Accounts</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/loan">Loans</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/investment">Investments</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/support">Support</a></li>
+                        <li class="nav-item ms-3"><a href="/login" class="btn btn-primary px-4">Login</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero py-4">
+        <div class="container">
+            <div class="row align-items-center py-5">
+
+                <div class="col-lg-7 text-white">
+                    <h1 class="display-2 fw-bold">
+                        Your Money
+                        <br>
+                        Your Future
+                    </h1>
+
+                    <p class="lead mt-4 mb-5">
+                        Bank of Belgium provides trusted banking solutions
+                        for individuals, businesses, and families with
+                        industry-leading security and 24/7 digital banking.
+                    </p>
+
+                    <a href="/register" class="btn btn-light btn-lg me-3">Open an Account</a>
+
+                    <a href="#" class="btn btn-outline-light btn-lg">Learn More</a>
+                </div>
+
+                <div class="col-lg-5 mt-5 mt-lg-0">
+                    <div class="card border-0 shadow-lg rounded-4">
+                        <div class="card-body p-5">
+                            <h3 class="text-primary">Premium Savings</h3>
+
+                            <h1 class="text-success fw-bold my-4">4.75% APY</h1>
+
+                            <p class="text-muted">
+                                Grow your savings with competitive interest
+                                rates and zero monthly fees.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center text-primary fw-bold mb-5">Why Choose Bank of Belgium?</h2>
+
+            <div class="row g-4">
+
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <h1>🔒</h1>
+
+                            <h4 class="mt-3">Secure Banking</h4>
+
+                            <p class="text-muted">
+                                Advanced encryption and fraud protection
+                                keep your finances safe.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <h1>💳</h1>
+
+                            <h4 class="mt-3">Easy Payments</h4>
+
+                            <p class="text-muted">
+                                Instant transfers, online payments,
+                                and contactless banking.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <h1>📱</h1>
+
+                            <h4 class="mt-3">Mobile Banking</h4>
+
+                            <p class="text-muted">
+                                Manage your accounts anytime
+                                with digital banking.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="bg-primary text-white py-5">
+        <div class="container">
+            <div class="row text-center g-4">
+
+                <div class="col-md-3">
+                    <h2 class="fw-bold">2M+</h2>
+                    <p>Customers</p>
+                </div>
+
+                <div class="col-md-3">
+                    <h2 class="fw-bold">€18B+</h2>
+                    <p>Assets Managed</p>
+                </div>
+
+                <div class="col-md-3">
+                    <h2 class="fw-bold">150+</h2>
+                    <p>Branches</p>
+                </div>
+
+                <div class="col-md-3">
+                    <h2 class="fw-bold">24/7</h2>
+                    <p>Support</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-dark text-white text-center py-4">
+        <p class="mb-0">© 2026 Bank of Belgium. All rights reserved.</p>
+        <p class="mb-0 mt-2">
+            <a href="{{ url_for('main.terms') }}" class="text-white-50 text-decoration-underline">Terms &amp; Conditions</a>
+            &middot;
+            <a href="{{ url_for('main.privacy') }}" class="text-white-50 text-decoration-underline">Privacy Policy</a>
+        </p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

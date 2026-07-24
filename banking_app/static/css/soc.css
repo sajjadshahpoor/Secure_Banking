@@ -1,0 +1,96 @@
+.soc-live-badge {
+    background: #e6f7ee;
+    color: #0a8a4a;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.soc-badge-low {
+    background: #e7f1ff;
+    color: #0056d6;
+}
+
+.soc-badge-medium {
+    background: #fff4e0;
+    color: #b26a00;
+}
+
+.soc-badge-high {
+    background: #ffe3e3;
+    color: #c9184a;
+}
+
+.soc-badge-critical {
+    background: #2b0a12;
+    color: #ff6b81;
+}
+
+.soc-status-open {
+    background: #ffe3e3;
+    color: #c9184a;
+}
+
+.soc-status-investigating {
+    background: #fff4e0;
+    color: #b26a00;
+}
+
+.soc-status-closed {
+    background: #e6f7ee;
+    color: #0a8a4a;
+}
+
+.soc-badge-low,
+.soc-badge-medium,
+.soc-badge-high,
+.soc-badge-critical,
+.soc-status-open,
+.soc-status-investigating,
+.soc-status-closed {
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+}
+
+/* "Massive alert" banner for confirmed honeypot interactions -- see
+   routes/honeypot.py. Pulses to make sure it can't be missed. */
+.honeypot-alert {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: #2b0a12;
+    border: 2px solid #ff3355;
+    border-radius: 12px;
+    color: #ffe3e3;
+    animation: honeypot-pulse 1.6s ease-in-out infinite;
+}
+
+.honeypot-alert-icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.honeypot-alert-title {
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #ff6b81;
+    font-size: 1.1rem;
+}
+
+.honeypot-alert-body {
+    font-size: 0.9rem;
+    color: #ffd0d8;
+}
+
+@keyframes honeypot-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 51, 85, 0.55);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(255, 51, 85, 0);
+    }
+}

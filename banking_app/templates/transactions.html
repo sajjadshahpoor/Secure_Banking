@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank of Belgium | Transaction History</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/dashboard">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" id="transactionsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Transactions
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="transactionsDropdown">
+                            <li><a class="dropdown-item" href="/transfer">Transfer</a></li>
+                            <li><a class="dropdown-item" href="/deposit">Deposit</a></li>
+                            <li><a class="dropdown-item active" href="{{ url_for('account.transactions') }}">History</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('account.dashboard') }}#support">Support</a></li>
+                    <li class="nav-item ms-3"><a href="/logout" class="btn btn-danger px-4">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="dashboard py-5">
+        <div class="container">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <div>
+                    <h1 class="fw-bold mb-1">Transaction History</h1>
+                    <p class="text-muted mb-0">Every transaction across all of your accounts.</p>
+                </div>
+                <a href="{{ url_for('account.download_statement') }}" class="btn btn-outline-primary">Download Statement</a>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for txn in transactions %}
+                                {% set is_self_transfer = txn['sender_account_id'] in owned_account_ids and txn['receiver_account_id'] in owned_account_ids %}
+                                {% set is_incoming = txn['sender_account_id'] not in owned_account_ids %}
+                                <tr>
+                                    <td>{{ txn['created_at'][:16] }}</td>
+                                    {# ================================================================ #}
+                                    {# [CTF-VULN #2 - MEDIUM] Stored XSS via transaction description.     #}
+                                    {# The `|safe` filter below disables Jinja's automatic HTML escaping  #}
+                                    {# for this field, so a transfer description containing a script tag  #}
+                                    {# runs in the browser of anyone who later views this page (the       #}
+                                    {# recipient of the transfer, or the sender viewing their own         #}
+                                    {# history). Without |safe, Jinja would render it as inert text.      #}
+                                    {# TRIGGER: send a transfer with description set to e.g.               #}
+                                    {#   <script>alert(document.cookie)</script>                          #}
+                                    {# then view /transactions (or the dashboard) as the recipient.        #}
+                                    {# THE FIX (not applied here on purpose): remove the |safe filter, or  #}
+                                    {# sanitize/escape the description before storing it.                 #}
+                                    {# ================================================================ #}
+                                    <td>{{ (txn['description'] or txn['transaction_type']) | safe }}{% if is_self_transfer %} <span class="text-muted small">(between your accounts)</span>{% endif %}</td>
+                                    <td>{{ txn['transaction_type'] }}</td>
+                                    <td class="fw-bold {{ 'text-muted' if is_self_transfer else ('text-success' if is_incoming else 'text-danger') }}">
+                                        {% if is_self_transfer %}€{{ "{:.2f}".format(txn['amount']) }}{% else %}{{ '+' if is_incoming else '-' }}€{{ "{:.2f}".format(txn['amount']) }}{% endif %}
+                                    </td>
+                                    <td>{{ txn['status'] }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No transactions yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">© 2026 Bank of Belgium. Secure Digital Banking.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

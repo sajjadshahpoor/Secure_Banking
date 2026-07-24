@@ -1,0 +1,34 @@
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    color:#003366;
+}
+
+
+.hero{
+    background:linear-gradient(135deg,#003366,#0056d6);
+}
+
+
+.navbar-brand img{
+    object-fit:contain;
+}
+
+
+.card{
+    border-radius:18px;
+}
+
+
+.btn-primary{
+    background:#0056d6;
+    border:none;
+}
+
+
+.btn-primary:hover{
+    background:#003f9e;
+}
+
+.text-primary{
+    color:#003366;
+}

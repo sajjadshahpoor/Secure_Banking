@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Team Banking - Secure Banking Platform</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0a1628;
+            --secondary: #1a2a4a;
+            --accent: #00d4ff;
+            --accent-dark: #0099cc;
+            --success: #00ff88;
+            --danger: #ff3355;
+            --warning: #ffaa00;
+            --text: #e0e8f0;
+            --text-dark: #8899aa;
+            --glass: rgba(10, 22, 40, 0.8);
+            --border: rgba(0, 212, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--primary);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Cyber Grid Background */
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Glow Effects */
+        .glow {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .glow-1 {
+            top: -200px;
+            right: -200px;
+            background: var(--accent);
+        }
+
+        .glow-2 {
+            bottom: -200px;
+            left: -200px;
+            background: var(--success);
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .nav-brand .shield {
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            opacity: 0.5;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.05));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .balance-card .card-value {
+            color: var(--accent);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .action-btn {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .action-btn .icon {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Transaction Table */
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .transaction-table th {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .transaction-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .transaction-table tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--success);
+        }
+
+        .status-badge.pending {
+            background: rgba(255, 170, 0, 0.15);
+            color: var(--warning);
+        }
+
+        .status-badge.failed {
+            background: rgba(255, 51, 85, 0.15);
+            color: var(--danger);
+        }
+
+        /* Security Features Section */
+        .security-section {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: var(--glass);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .security-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .security-item .icon {
+            font-size: 1.5rem;
+        }
+
+        .security-item .info {
+            flex: 1;
+        }
+
+        .security-item .label {
+            font-size: 0.8rem;
+            color: var(--text-dark);
+        }
+
+        .security-item .value {
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--primary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        /* MFA Toggle */
+        .mfa-toggle {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: #333;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-banner.info {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .alert-banner.success {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--success);
+        }
+
+        .alert-banner.warning {
+            background: rgba(255, 170, 0, 0.1);
+            border-color: var(--warning);
+        }
+
+        .alert-banner.danger {
+            background: rgba(255, 51, 85, 0.1);
+            border-color: var(--danger);
+        }
+
+        /* Honeypot Section */
+        .honeypot-section {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: rgba(255, 51, 85, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 51, 85, 0.2);
+        }
+
+        .honeypot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .honeypot-item {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .honeypot-item:hover {
+            border-color: var(--danger);
+            background: rgba(255, 51, 85, 0.1);
+        }
+
+        .honeypot-item .icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .honeypot-item .name {
+            font-weight: 600;
+        }
+
+        .honeypot-item .desc {
+            font-size: 0.8rem;
+            color: var(--text-dark);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .footer .highlight {
+            color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .transaction-table {
+                font-size: 0.8rem;
+            }
+
+            .transaction-table th,
+            .transaction-table td {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <!-- Cyber Grid Background -->
+    <div class="cyber-grid"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/dashboard">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/transfer">Transfers</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('account.dashboard') }}#support">Support</a></li>
+                    <li class="nav-item ms-3"><a href="/logout" class="btn btn-danger px-4">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container" id="mainContent">
+        <!-- Dashboard -->
+        <div id="dashboardView">
+            <!-- Alert Banner -->
+            <div class="alert-banner info">
+                <span>🔒</span>
+                <div>
+                    <strong>Security Status:</strong> All systems operational. MFA enabled for all accounts.
+                    <span style="color: var(--text-dark); margin-left: 1rem;">🛡️ 0 threats detected in last 24h</span>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <div class="card balance-card">
+                    <div class="card-header">
+                        <span class="card-title">Total Balance</span>
+                        <span class="card-icon">💰</span>
+                    </div>
+                    <div class="card-value">$24,850.42</div>
+                    <div style="color: var(--success); font-size: 0.9rem; margin-top: 0.5rem;">
+                        ↑ 12.5% this month
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Active Sessions</span>
+                        <span class="card-icon">👤</span>
+                    </div>
+                    <div class="card-value">1</div>
+                    <div style="color: var(--text-dark); font-size: 0.8rem; margin-top: 0.5rem;">
+                        Last login: 10 mins ago
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Security Score</span>
+                        <span class="card-icon">🛡️</span>
+                    </div>
+                    <div class="card-value" style="color: var(--success);">96/100</div>
+                    <div style="color: var(--text-dark); font-size: 0.8rem; margin-top: 0.5rem;">
+                        MFA Enabled • Strong Password
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Alerts</span>
+                        <span class="card-icon">🔔</span>
+                    </div>
+                    <div class="card-value" style="color: var(--warning);">3</div>
+                    <div style="color: var(--text-dark); font-size: 0.8rem; margin-top: 0.5rem;">
+                        2 critical, 1 warning
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="action-btn" onclick="showTransfer()">
+                    <span class="icon">💸</span>
+                    Transfer
+                </button>
+                <button class="action-btn" onclick="showDeposit()">
+                    <span class="icon">💳</span>
+                    Deposit
+                </button>
+                <button class="action-btn" onclick="showSecurity()">
+                    <span class="icon">🔐</span>
+                    Security
+                </button>
+                <button class="action-btn" onclick="showHoneypot()">
+                    <span class="icon">🎯</span>
+                    Honeypot
+                </button>
+                <button class="action-btn" onclick="showAuditLog()">
+                    <span class="icon">📋</span>
+                    Audit Log
+                </button>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Recent Transactions</span>
+                    <button class="btn btn-outline" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">View All</button>
+                </div>
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2026-07-15 14:30</td>
+                            <td>Transfer to Savings</td>
+                            <td style="color: var(--danger);">-$500.00</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-15 10:15</td>
+                            <td>Salary Deposit</td>
+                            <td style="color: var(--success);">+$3,200.00</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-14 18:45</td>
+                            <td>Online Purchase - Amazon</td>
+                            <td style="color: var(--danger);">-$149.99</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-14 09:20</td>
+                            <td>Transfer to John Smith</td>
+                            <td style="color: var(--danger);">-$250.00</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-13 22:00</td>
+                            <td>ATM Withdrawal</td>
+                            <td style="color: var(--danger);">-$200.00</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Security Features Overview -->
+            <div class="security-section">
+                <h3 style="margin-bottom: 1rem;">🔒 Active Security Measures</h3>
+                <div class="security-grid">
+                    <div class="security-item">
+                        <span class="icon">🔑</span>
+                        <div class="info">
+                            <div class="label">Authentication</div>
+                            <div class="value">Argon2 + MFA</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="icon">🍪</span>
+                        <div class="info">
+                            <div class="label">Cookies</div>
+                            <div class="value">HttpOnly • Secure</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="icon">🛡️</span>
+                        <div class="info">
+                            <div class="label">CSRF Protection</div>
+                            <div class="value">Tokens Enabled</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="icon">🚫</span>
+                        <div class="info">
+                            <div class="label">Rate Limiting</div>
+                            <div class="value">5 attempts/min</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="icon">📊</span>
+                        <div class="info">
+                            <div class="label">Monitoring</div>
+                            <div class="value">Grafana + Prometheus</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="icon">🎯</span>
+                        <div class="info">
+                            <div class="label">Honeypot</div>
+                            <div class="value">Active • 0 hits</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions View (Hidden by default) -->
+        <div id="transactionsView" style="display: none;">
+            <h2>Transaction History</h2>
+            <div class="card" style="margin-top: 1.5rem;">
+                <div class="card-header">
+                    <span class="card-title">All Transactions</span>
+                    <div>
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; margin-right: 0.5rem;">Export CSV</button>
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">Filter</button>
+                    </div>
+                </div>
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2026-07-15 14:30</td>
+                            <td>Transfer to Savings</td>
+                            <td>Transfer</td>
+                            <td style="color: var(--danger);">-$500.00</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                            <td style="font-size: 0.8rem; color: var(--text-dark);">192.168.1.100</td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-15 10:15</td>
+                            <td>Salary Deposit</td>
+                            <td>Income</td>
+                            <td style="color: var(--success);">+$3,200.00</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                            <td style="font-size: 0.8rem; color: var(--text-dark);">10.0.0.1</td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-14 18:45</td>
+                            <td>Online Purchase - Amazon</td>
+                            <td>Shopping</td>
+                            <td style="color: var(--danger);">-$149.99</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                            <td style="font-size: 0.8rem; color: var(--text-dark);">192.168.1.105</td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-14 09:20</td>
+                            <td>Transfer to John Smith</td>
+                            <td>Transfer</td>
+                            <td style="color: var(--danger);">-$250.00</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td style="font-size: 0.8rem; color: var(--text-dark);">192.168.1.100</td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-13 22:00</td>
+                            <td>ATM Withdrawal</td>
+                            <td>Withdrawal</td>
+                            <td style="color: var(--danger);">-$200.00</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                            <td style="font-size: 0.8rem; color: var(--text-dark);">10.0.0.5</td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-13 16:20</td>
+                            <td>Netflix Subscription</td>
+                            <td>Entertainment</td>
+                            <td style="color: var(--danger);">-$15.99</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                            <td style="font-size: 0.8rem; color: var(--text-dark);">192.168.1.102</td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-12 11:45</td>
+                            <td>Freelance Payment</td>
+                            <td>Income</td>
+                            <td style="color: var(--success);">+$850.00</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                            <td style="font-size: 0.8rem; color: var(--text-dark);">10.0.0.3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Security View (Hidden by default) -->
+        <div id="securityView" style="display: none;">
+            <h2>🔐 Security Center</h2>
+            
+            <div class="security-section">
+                <h3 style="margin-bottom: 1rem;">Multi-Factor Authentication</h3>
+                <div class="mfa-toggle">
+                    <span>MFA Status:</span>
+                    <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    <span style="color: var(--success);">Enabled</span>
+                </div>
+                <p style="color: var(--text-dark); font-size: 0.9rem;">
+                    TOTP-based authentication using Google Authenticator or similar apps.
+                </p>
+                <button class="btn btn-primary" style="margin-top: 1rem;">Setup MFA</button>
+            </div>
+
+            <div class="security-section">
+                <h3 style="margin-bottom: 1rem;">Password & Security</h3>
+                <div class="security-grid">
+                    <div class="security-item">
+                        <span class="icon">🔑</span>
+                        <div class="info">
+                            <div class="label">Password Strength</div>
+                            <div class="value" style="color: var(--success);">Strong</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="icon">🔄</span>
+                        <div class="info">
+                            <div class="label">Last Changed</div>
+                            <div class="value">15 days ago</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="icon">📱</span>
+                        <div class="info">
+                            <div class="label">Trusted Devices</div>
+                            <div class="value">2 devices</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-outline" style="margin-top: 1rem;">Change Password</button>
+            </div>
+
+            <div class="security-section">
+                <h3 style="margin-bottom: 1rem;">Active Security Headers</h3>
+                <div class="security-grid">
+                    <div class="security-item">
+                        <span class="icon">🛡️</span>
+                        <div class="info">
+                            <div class="label">CSP</div>
+                            <div class="value">Strict</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="icon">🔒</span>
+                        <div class="info">
+                            <div class="label">HSTS</div>
+                            <div class="value">Enabled</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="icon">🛡️</span>
+                        <div class="info">
+                            <div class="label">X-Frame-Options</div>
+                            <div class="value">DENY</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="icon">🔐</span>
+                        <div class="info">
+                            <div class="label">X-Content-Type-Options</div>
+                            <div class="value">nosniff</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Honeypot View (Hidden by default) -->
+        <div id="honeypotView" style="display: none;">
+            <h2>🎯 Honeypot & Deception System</h2>
+            
+            <div class="alert-banner warning">
+                <span>⚠️</span>
+                <div>
+                    <strong>Honeypot Active:</strong> This is a deception system designed to detect and log attackers.
+                    All interactions are monitored and logged for analysis.
+                </div>
+            </div>
+
+            <div class="honeypot-section">
+                <h3>Fake Admin Panel</h3>
+                <p style="color: var(--text-dark); margin: 0.5rem 0 1rem 0;">
+                    A realistic admin login portal that captures all attempts.
+                </p>
+                <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 8px; max-width: 400px;">
+                    <div style="margin-bottom: 1rem;">
+                        <input type="text" placeholder="Username" style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 4px; color: var(--text); margin-bottom: 0.5rem;">
+                        <input type="password" placeholder="Password" style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 4px; color: var(--text);">
+                    </div>
+                    <button class="btn btn-danger" style="width: 100%;" onclick="this.textContent='🚨 ATTEMPT LOGGED 🚨'; setTimeout(() => this.textContent='Login Attempt', 2000);">Login</button>
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-dark); text-align: center;">
+                        ⚡ All attempts are logged to honeypot database
+                    </div>
+                </div>
+            </div>
+
+            <div class="honeypot-section">
+                <h3>Decoy Files & Credentials</h3>
+                <div class="honeypot-grid">
+                    <div class="honeypot-item" onclick="this.style.borderColor='var(--danger)'; this.innerHTML += ' 🚨'">
+                        <span class="icon">📄</span>
+                        <div class="name">AWS_KEYS.txt</div>
+                        <div class="desc">Fake AWS credentials</div>
+                    </div>
+                    <div class="honeypot-item" onclick="this.style.borderColor='var(--danger)'; this.innerHTML += ' 🚨'">
+                        <span class="icon">📊</span>
+                        <div class="name">passwords.xlsx</div>
+                        <div class="desc">Decoy password spreadsheet</div>
+                    </div>
+                    <div class="honeypot-item" onclick="this.style.borderColor='var(--danger)'; this.innerHTML += ' 🚨'">
+                        <span class="icon">🗄️</span>
+                        <div class="name">database.sql</div>
+                        <div class="desc">Fake database dump</div>
+                    </div>
+                    <div class="honeypot-item" onclick="this.style.borderColor='var(--danger)'; this.innerHTML += ' 🚨'">
+                        <span class="icon">🔑</span>
+                        <div class="name">private.pem</div>
+                        <div class="desc">Decoy private key</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="honeypot-section">
+                <h3>Fake API Endpoints</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 4px; text-align: center; font-size: 0.9rem;">
+                        <span style="color: var(--text-dark);">GET</span> /api/admin/users
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 4px; text-align: center; font-size: 0.9rem;">
+                        <span style="color: var(--text-dark);">POST</span> /api/debug/exec
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 4px; text-align: center; font-size: 0.9rem;">
+                        <span style="color: var(--text-dark);">GET</span> /api/internal/config
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 4px; text-align: center; font-size: 0.9rem;">
+                        <span style="color: var(--text-dark);">POST</span> /api/admin/backup
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-dark); text-align: center;">
+                    🔍 All API requests to these endpoints are logged with full request details
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Log View (Hidden by default) -->
+        <div id="auditView" style="display: none;">
+            <h2>📋 Audit Log</h2>
+            <div class="card" style="margin-top: 1.5rem;">
+                <div class="card-header">
+                    <span class="card-title">Security Events</span>
+                    <div>
+                        <span style="color: var(--text-dark); font-size: 0.8rem;">Last 24 hours: 0 events</span>
+                    </div>
+                </div>
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Event Type</th>
+                            <th>User</th>
+                            <th>IP Address</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2026-07-15 14:30:12</td>
+                            <td>Login</td>
+                            <td>john.doe@email.com</td>
+                            <td style="font-size: 0.8rem;">192.168.1.100</td>
+                            <td><span class="status-badge success">Success</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-15 14:28:45</td>
+                            <td>MFA Verification</td>
+                            <td>john.doe@email.com</td>
+                            <td style="font-size: 0.8rem;">192.168.1.100</td>
+                            <td><span class="status-badge success">Success</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-15 14:15:03</td>
+                            <td>Transfer</td>
+                            <td>john.doe@email.com</td>
+                            <td style="font-size: 0.8rem;">192.168.1.100</td>
+                            <td><span class="status-badge success">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-15 10:20:33</td>
+                            <td>Password Change</td>
+                            <td>john.doe@email.com</td>
+                            <td style="font-size: 0.8rem;">10.0.0.1</td>
+                            <td><span class="status-badge success">Success</span></td>
+                        </tr>
+                        <tr>
+                            <td>2026-07-14 23:05:17</td>
+                            <td>Failed Login</td>
+                            <td>unknown@attempt.com</td>
+                            <td style="font-size: 0.8rem; color: var(--danger);">192.168.1.200</td>
+                            <td><span class="status-badge failed">Failed</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div class="modal" id="transferModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💸 Transfer Money</h3>
+                <button class="modal-close" onclick="closeModal('transferModal')">&times;</button>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Transfer initiated! (Demo)'); closeModal('transferModal')">
+                <div class="form-group">
+                    <label>Recipient</label>
+                    <input type="text" placeholder="Enter recipient email or account number" required>
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" placeholder="0.00" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" placeholder="Transfer description">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Send Money</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('transferModal')">Cancel</button>
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-dark); text-align: center;">
+                    🔒 Secured with MFA • All transfers are logged
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💳 Deposit Funds</h3>
+                <button class="modal-close" onclick="closeModal('depositModal')">&times;</button>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Deposit initiated! (Demo)'); closeModal('depositModal')">
+                <div class="form-group">
+                    <label>Deposit Method</label>
+                    <select>
+                        <option>Bank Transfer</option>
+                        <option>Credit Card</option>
+                        <option>Debit Card</option>
+                        <option>Crypto (BTC)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" placeholder="0.00" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Reference</label>
+                    <input type="text" placeholder="Deposit reference number">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-success" style="flex: 1;">Deposit</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('depositModal')">Cancel</button>
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-dark); text-align: center;">
+                    🔒 All deposits are encrypted and monitored
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Navigation Functions
+        function showDashboard() {
+            document.getElementById('dashboardView').style.display = 'block';
+            document.getElementById('transactionsView').style.display = 'none';
+            document.getElementById('securityView').style.display = 'none';
+            document.getElementById('honeypotView').style.display = 'none';
+            document.getElementById('auditView').style.display = 'none';
+        }
+
+        function showTransactions() {
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('transactionsView').style.display = 'block';
+            document.getElementById('securityView').style.display = 'none';
+            document.getElementById('honeypotView').style.display = 'none';
+            document.getElementById('auditView').style.display = 'none';
+        }
+
+        function showSecurity() {
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('transactionsView').style.display = 'none';
+            document.getElementById('securityView').style.display = 'block';
+            document.getElementById('honeypotView').style.display = 'none';
+            document.getElementById('auditView').style.display = 'none';
+        }
+
+        function showHoneypot() {
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('transactionsView').style.display = 'none';
+            document.getElementById('securityView').style.display = 'none';
+            document.getElementById('honeypotView').style.display = 'block';
+            document.getElementById('auditView').style.display = 'none';
+        }
+
+        function showAuditLog() {
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('transactionsView').style.display = 'none';
+            document.getElementById('securityView').style.display = 'none';
+            document.getElementById('honeypotView').style.display = 'none';
+            document.getElementById('auditView').style.display = 'block';
+        }
+
+        // Modal Functions
+        function showTransfer() {
+            document.getElementById('transferModal').classList.add('active');
+        }
+
+        function showDeposit() {
+            document.getElementById('depositModal').classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function showLogin() {
+            alert('🔐 Login System\n\nFeatures:\n• Argon2 Password Hashing\n• MFA (TOTP)\n• Session Management\n• Rate Limiting\n• Brute Force Protection\n\nThis is a demo - backend integration required.');
+        }
+
+        // Close modals on outside click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Simulate real-time updates
+        function updateDashboard() {
+            // Update security score randomly for demo effect
+            const score = document.querySelector('.balance-card + .card + .card .card-value');
+            if (score) {
+                const current = parseInt(score.textContent);
+                const change = Math.floor(Math.random() * 3) - 1;
+                let newScore = current + change;
+                newScore = Math.max(90, Math.min(100, newScore));
+                score.textContent = newScore + '/100';
+            }
+        }
+
+        setInterval(updateDashboard, 30000);
+    </script>
+</body>
+</html>

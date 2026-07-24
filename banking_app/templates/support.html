@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bank of Belgium | Support</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/support.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" width="55" class="me-3" alt="Bank Logo">
+                <span class="fw-bold fs-3" style="color:#003366">Bank of Belgium</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/account">Accounts</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/loan">Loans</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/investment">Investments</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/support">Support</a></li>
+                    <li class="nav-item ms-3"><a href="/login" class="btn btn-primary px-4">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container text-center text-white">
+            <h1>How Can We Help You?</h1>
+
+            <p>
+                Our banking specialists are available 24/7
+                to support your financial needs.
+            </p>
+        </div>
+    </section>
+
+    <!-- SUPPORT OPTIONS -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row g-4">
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="card support-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h1>📞</h1>
+
+                            <h3>Call Support</h3>
+
+                            <p>Speak directly with our customer service team.</p>
+
+                            <h5 class="text-primary">+32 2 555 0000</h5>
+
+                            <p class="text-muted">Available 24/7</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="card support-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h1>✉️</h1>
+
+                            <h3>Email Support</h3>
+
+                            <p>Send us your questions and receive assistance.</p>
+
+                            <h5 class="text-primary">support@bankofbelgium.com</h5>
+
+                            <p class="text-muted">Response within 24 hours</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="card support-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h1>💬</h1>
+
+                            <h3>Live Chat</h3>
+
+                            <p>Chat with a banking specialist instantly.</p>
+
+                            <button class="btn btn-primary">Start Chat</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT FORM -->
+    <section class="pb-5">
+        <div class="container">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5">
+
+                    <h2 class="text-primary text-center mb-4">Send Us A Message</h2>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="/support">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" name="name" class="form-control form-control-lg" placeholder="Your name" value="{{ form.get('name', '') }}" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" name="email" class="form-control form-control-lg" placeholder="your@email.com" value="{{ form.get('email', '') }}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Subject</label>
+                            <input type="text" name="subject" class="form-control form-control-lg" placeholder="How can we help?" value="{{ form.get('subject', '') }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea name="message" class="form-control" rows="5" placeholder="Write your message" required>{{ form.get('message', '') }}</textarea>
+                        </div>
+
+                        <button class="btn btn-primary btn-lg w-100">Submit Request</button>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center text-primary mb-5">Frequently Asked Questions</h2>
+
+            <div class="accordion" id="faq">
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#one">
+                            How do I open an account?
+                        </button>
+                    </h2>
+                    <div id="one" class="accordion-collapse collapse show">
+                        <div class="accordion-body">
+                            You can open an account online by completing
+                            our registration process.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#two">
+                            How do I transfer money?
+                        </button>
+                    </h2>
+                    <div id="two" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            Use the Transfer section in your dashboard
+                            to securely send money.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#three">
+                            How is my account protected?
+                        </button>
+                    </h2>
+                    <div id="three" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            We use encryption, fraud monitoring,
+                            and security verification.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">© 2026 Bank of Belgium. Secure Digital Banking.</p>
+        <p class="mb-0 mt-2">
+            <a href="{{ url_for('main.terms') }}" class="text-white-50 text-decoration-underline">Terms &amp; Conditions</a>
+            &middot;
+            <a href="{{ url_for('main.privacy') }}" class="text-white-50 text-decoration-underline">Privacy Policy</a>
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
