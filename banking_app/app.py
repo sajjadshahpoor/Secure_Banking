@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 def load_local_env() -> None:
@@ -31,6 +32,15 @@ def create_app():
 
     app = Flask(__name__)
 
+    # docker-compose puts exactly one reverse proxy (nginx) in front of the
+    # app. ProxyFix trusts only that single hop's X-Forwarded-For/-Proto
+    # headers and rewrites request.remote_addr/request.scheme accordingly,
+    # so the rest of the app can trust those values directly instead of
+    # reading X-Forwarded-For itself -- which a client could otherwise set
+    # to any value they like and have it recorded as-is in security/audit
+    # logs.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=0, x_port=0, x_prefix=0)
+
     app.config.from_object(Config)
 
     # SESSION_COOKIE_SECURE=true is this app's own signal that it's running
@@ -59,9 +69,14 @@ def create_app():
             "'self'",
             "https://cdn.jsdelivr.net"
         ],
+        # No 'unsafe-inline' -- every inline <script> block in the
+        # templates now carries a per-request nonce (via {{ csp_nonce() }})
+        # instead, so only scripts the server itself emitted can run.
+        # (Browsers that understand nonce-source ignore 'unsafe-inline'
+        # when both are present anyway, so leaving it out is also just
+        # the honest description of what's actually enforced.)
         "script-src": [
             "'self'",
-            "'unsafe-inline'",
             "https://cdn.jsdelivr.net"
         ],
         "img-src": [
@@ -71,7 +86,8 @@ def create_app():
         "font-src": [
             "'self'"
         ]
-    }
+    },
+    content_security_policy_nonce_in=["script-src"],
 )
 
 

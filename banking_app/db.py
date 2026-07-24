@@ -17,6 +17,12 @@ from .email_utils import send_security_alert
 
 BRUSSELS_TZ = ZoneInfo("Europe/Brussels")
 
+# Compared against on every login attempt for a nonexistent email, so that
+# response timing doesn't itself reveal whether the account exists (a real
+# lookup would otherwise skip the (comparatively slow) hash comparison
+# entirely for unknown emails).
+_DUMMY_PASSWORD_HASH = generate_password_hash("not-a-real-password-timing-decoy")
+
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
@@ -269,15 +275,33 @@ EMAIL_REGEX = re.compile(
 def valid_email(email: str) -> bool:
     return bool(EMAIL_REGEX.fullmatch(email.strip()))
 
-COMMON_PASSWORDS = {
-    "password123!",
-    "Password123!",
-    "qwerty123!",
-}
+# Passwords that satisfy valid_password()'s length/complexity rule below
+# but are still well-known/predictable (top leaked-password stems with
+# just enough added to pass the regex) -- complexity requirements alone
+# don't stop someone from picking "Password123!". Not a substitute for a
+# real breached-password check (e.g. the HaveIBeenPwned range API), but a
+# meaningfully wider net than the previous 3-entry list.
+COMMON_PASSWORDS = {p.casefold() for p in {
+    "Password123!", "Password1234!", "Passw0rd123!", "Passw0rd1234!",
+    "Qwerty123!", "Qwerty1234!", "Welcome123!", "Welcome1234!",
+    "Admin123!", "Administrator123!", "Letmein123!", "Iloveyou123!",
+    "Football123!", "Monkey123!", "Dragon123!", "Master123!",
+    "Sunshine123!", "Princess123!", "Trustno1234!", "Baseball123!",
+    "Superman123!", "Batman123!", "Starwars123!", "Whatever123!",
+    "Freedom123!", "Ninja123!", "Michael123!", "Charlie123!",
+    "Jordan123!", "Hunter123!", "Hunter2123!", "Shadow123!",
+    "Cookie123!", "Summer123!", "Winter123!", "Autumn123!",
+    "Spring123!", "Flower123!", "Butterfly123!", "Chocolate123!",
+    "Abc123456!", "Abcd1234!", "Zaq12wsx!", "Zxcvbnm123!",
+    "Asdfghjkl123!", "Qazwsx123!", "Aa123456!", "P@ssword123",
+    "P@ssw0rd123", "Changeme123!", "Password2024!", "Password2025!",
+    "Password2026!", "Banking123!", "Money123!", "Account123!",
+    "Security123!", "Login123456!",
+}}
 
 def valid_password(password: str) -> bool:
 
-    if password in COMMON_PASSWORDS:
+    if password.casefold() in COMMON_PASSWORDS:
         return False
 
     return (
@@ -805,6 +829,18 @@ def create_user(
 
 
 def authenticate_user(email: str, password: str, ip_address: Optional[str] = None, user_agent: Optional[str] = None):
+    """Verify credentials and return (user, None) on success or (None, message)
+    on failure.
+
+    Password verification intentionally happens BEFORE any account-state
+    check (deactivated / unverified / locked): every one of those states
+    used to short-circuit with its own distinct message ahead of the
+    password check, which let anyone probe /login with a guessed email and
+    learn whether it was registered -- and its exact state -- without ever
+    knowing the password. Now a wrong password (or an unknown email) always
+    returns the same generic message, and account-state detail is only
+    revealed once the caller has already proven they know the password.
+    """
     database = get_db()
     normalized_email = email.strip().lower()
     user = database.execute(
@@ -813,11 +849,53 @@ def authenticate_user(email: str, password: str, ip_address: Optional[str] = Non
     ).fetchone()
 
     if user is None:
+        # Compare against a dummy hash anyway so this path takes roughly
+        # the same time as a real wrong-password path, rather than
+        # returning near-instantly for unknown emails.
+        check_password_hash(_DUMMY_PASSWORD_HASH, password)
         record_login_history(None, False, ip_address, user_agent)
         record_audit_log(None, "LOGIN_FAILED", "users", f"Failed login attempt for {normalized_email}.", ip_address, user_agent)
         database.commit()
         return None, "Invalid email or password."
 
+    if not check_password_hash(user["password_hash"], password):
+        failed_attempts = int(user["failed_login_attempts"] or 0) + 1
+        lock_until = None
+
+        if failed_attempts >= 5:
+            lock_until = _utc_in(15)
+            record_security_event(
+                user["id"],
+                "Brute Force",
+                "High",
+                ip_address,
+                "login",
+                "Multiple failed password attempts triggered the account lockout policy.",
+                "Application",
+                "Open",
+            )
+
+        database.execute(
+            """
+            UPDATE users
+            SET failed_login_attempts = ?,
+                account_locked_until = ?,
+                updated_at = ?
+            WHERE id = ?
+            """,
+            (failed_attempts, lock_until, _utc_now(), user["id"]),
+        )
+        record_login_history(user["id"], False, ip_address, user_agent)
+        record_audit_log(user["id"], "LOGIN_FAILED", "users", "Password verification failed.", ip_address, user_agent)
+        database.commit()
+        # Always generic, even once this attempt trips the lockout --
+        # revealing "now locked" here would itself confirm the email is
+        # registered.
+        return None, "Invalid email or password."
+
+    # Password confirmed correct: only now is it safe to reveal
+    # account-state detail, since the caller has proven they already know
+    # the password.
     if not user["is_active"]:
         record_login_history(user["id"], False, ip_address, user_agent)
         record_security_event(
@@ -854,40 +932,6 @@ def authenticate_user(email: str, password: str, ip_address: Optional[str] = Non
         )
         database.commit()
         return None, "Your account is temporarily locked. Try again later."
-
-    if not check_password_hash(user["password_hash"], password):
-        failed_attempts = int(user["failed_login_attempts"] or 0) + 1
-        lock_until = None
-        message = "Invalid email or password."
-
-        if failed_attempts >= 5:
-            lock_until = _utc_in(15)
-            message = "Too many failed attempts. Your account is locked for 15 minutes."
-            record_security_event(
-                user["id"],
-                "Brute Force",
-                "High",
-                ip_address,
-                "login",
-                "Multiple failed password attempts triggered the account lockout policy.",
-                "Application",
-                "Open",
-            )
-
-        database.execute(
-            """
-            UPDATE users
-            SET failed_login_attempts = ?,
-                account_locked_until = ?,
-                updated_at = ?
-            WHERE id = ?
-            """,
-            (failed_attempts, lock_until, _utc_now(), user["id"]),
-        )
-        record_login_history(user["id"], False, ip_address, user_agent)
-        record_audit_log(user["id"], "LOGIN_FAILED", "users", "Password verification failed.", ip_address, user_agent)
-        database.commit()
-        return None, message
 
     database.execute(
         """
@@ -1006,6 +1050,26 @@ def update_account_balance(account_id: str, amount: float) -> None:
         (amount, _utc_now(), account_id),
     )
     database.commit()
+
+
+def debit_account_if_sufficient(account_id: str, amount: float) -> bool:
+    """Atomically debit an account, but only if it still has enough balance.
+
+    The balance check and the write happen in a single UPDATE statement
+    (WHERE balance >= amount), so two concurrent transfers from the same
+    account can't both pass a separate, earlier balance check and then
+    both debit -- one of them will always see the post-first-debit balance
+    and have its UPDATE match zero rows here. Returns False (no rows
+    changed, no debit applied) if the balance was insufficient at the
+    moment of the write.
+    """
+    database = get_db()
+    cursor = database.execute(
+        "UPDATE accounts SET balance = balance - ?, updated_at = ? WHERE id = ? AND balance >= ?",
+        (amount, _utc_now(), account_id, amount),
+    )
+    database.commit()
+    return cursor.rowcount > 0
 
 
 def create_transaction(

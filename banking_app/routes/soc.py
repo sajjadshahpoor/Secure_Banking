@@ -135,7 +135,7 @@ def update_event_status(event_id):
         "SECURITY_EVENT_STATUS_UPDATED",
         "security_events",
         f"Security event {event_id} marked as {new_status}.",
-        request.headers.get("X-Forwarded-For", request.remote_addr),
+        request.remote_addr,
         request.headers.get("User-Agent", ""),
     )
     get_db().commit()
@@ -162,7 +162,7 @@ def deactivate_user(user_id):
         "USER_DEACTIVATED",
         "users",
         f"Deactivated account {target['email']}.",
-        request.headers.get("X-Forwarded-For", request.remote_addr),
+        request.remote_addr,
         request.headers.get("User-Agent", ""),
     )
     get_db().commit()
@@ -185,7 +185,7 @@ def reactivate_user(user_id):
         "USER_REACTIVATED",
         "users",
         f"Reactivated account {target['email']}.",
-        request.headers.get("X-Forwarded-For", request.remote_addr),
+        request.remote_addr,
         request.headers.get("User-Agent", ""),
     )
     get_db().commit()
@@ -208,7 +208,7 @@ def unlock_user(user_id):
         "USER_UNLOCKED",
         "users",
         f"Cleared the brute-force lockout on {target['email']}.",
-        request.headers.get("X-Forwarded-For", request.remote_addr),
+        request.remote_addr,
         request.headers.get("User-Agent", ""),
     )
     get_db().commit()

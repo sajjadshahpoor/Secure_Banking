@@ -144,8 +144,7 @@
                                             <code class="fs-6 iban-value" id="iban-{{ loop.index }}">{{ account['iban'] }}</code>
                                             <button type="button"
                                                     class="btn btn-sm btn-outline-secondary copy-iban-btn"
-                                                    data-iban="{{ account['iban'] }}"
-                                                    onclick="copyIban(this)">
+                                                    data-iban="{{ account['iban'] }}">
                                                 Copy
                                             </button>
                                         </div>
@@ -330,7 +329,7 @@
 
                             <p class="text-muted">Chat with a banking specialist instantly.</p>
 
-                            <button type="button" class="btn btn-primary" onclick="document.getElementById('chatNotice').classList.remove('d-none')">
+                            <button type="button" class="btn btn-primary" id="startChatBtn">
                                 Start Chat
                             </button>
                             <p id="chatNotice" class="text-muted small mt-3 d-none">
@@ -386,7 +385,7 @@
     {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+    <script nonce="{{ csp_nonce() }}">
         document.addEventListener('DOMContentLoaded', function () {
             const toastContainer = document.getElementById('successToast');
             if (toastContainer) {
@@ -394,6 +393,17 @@
                     const toast = new bootstrap.Toast(el);
                     toast.show();
                     setTimeout(() => toast.hide(), 4000);
+                });
+            }
+
+            document.querySelectorAll('.copy-iban-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () { copyIban(btn); });
+            });
+
+            const startChatBtn = document.getElementById('startChatBtn');
+            if (startChatBtn) {
+                startChatBtn.addEventListener('click', function () {
+                    document.getElementById('chatNotice').classList.remove('d-none');
                 });
             }
         });

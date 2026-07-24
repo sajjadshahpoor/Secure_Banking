@@ -28,7 +28,7 @@ def admin_required(view_func):
                 current_user.id,
                 "Unauthorized Admin Access",
                 "High",
-                request.headers.get("X-Forwarded-For", request.remote_addr),
+                request.remote_addr,
                 request.path,
                 f"User {current_user.email} attempted to access an admin-only resource without the Admin role.",
                 "Application",
@@ -39,7 +39,7 @@ def admin_required(view_func):
                 "ACCESS_DENIED",
                 request.path,
                 "Attempted to access an admin-only resource.",
-                request.headers.get("X-Forwarded-For", request.remote_addr),
+                request.remote_addr,
                 request.headers.get("User-Agent", ""),
             )
             get_db().commit()

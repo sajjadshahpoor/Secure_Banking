@@ -12,6 +12,7 @@ from ..db import (
     create_default_account,
     create_email_otp,
     create_transaction,
+    debit_account_if_sufficient,
     ensure_account_card,
     get_account_by_iban,
     get_account_by_id,
@@ -233,6 +234,19 @@ def open_account():
     return redirect(url_for("account.dashboard"))
 
 
+def _csv_safe(value: str) -> str:
+    """Neutralize spreadsheet formula injection.
+
+    Excel/LibreOffice/Sheets treat a cell starting with =, +, -, or @ as a
+    formula. transaction descriptions are user-controlled (transfer form),
+    so without this a description like '=HYPERLINK(...)' becomes a live
+    formula the moment someone opens the exported CSV.
+    """
+    if value and value[0] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + value
+    return value
+
+
 @account_bp.route("/statement/download")
 @login_required
 def download_statement():
@@ -248,7 +262,7 @@ def download_statement():
         writer.writerow(
             [
                 txn["created_at"],
-                txn["description"] or txn["transaction_type"],
+                _csv_safe(txn["description"] or txn["transaction_type"]),
                 txn["transaction_type"],
                 direction,
                 f"{float(txn['amount']):.2f}",
@@ -405,7 +419,21 @@ def transfer():
         is_internal_self_transfer = receiver_account["user_id"] == sender_account["user_id"]
 
         if not is_internal_self_transfer:
-            update_account_balance(sender_account["id"], -amount)
+            # Atomic check-and-debit: the earlier balance check above reads
+            # a snapshot that could be stale by the time we get here if two
+            # transfers from the same account run concurrently. This single
+            # UPDATE re-checks the balance and debits in one statement, so
+            # a second concurrent transfer that would overdraw the account
+            # can't slip through between the check and the write.
+            if not debit_account_if_sufficient(sender_account["id"], amount):
+                flash("Insufficient balance for this transfer.", "danger")
+                return render_template(
+                    "transfer.html",
+                    accounts=accounts,
+                    recent_transactions=recent_transactions,
+                    owned_account_ids=owned_account_ids,
+                    form=request.form,
+                )
         else:
             # [SOC DETECTION for CTF-VULN #3] A legitimate internal
             # transfer is balance-neutral for the user overall, so every

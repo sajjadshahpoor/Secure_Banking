@@ -64,7 +64,7 @@ def login():
         user, error = authenticate_user(
             login,
             password,
-            request.headers.get("X-Forwarded-For", request.remote_addr),
+            request.remote_addr,
             request.headers.get("User-Agent", ""),
         )
 
@@ -194,7 +194,7 @@ def logout():
     if user_id:
         record_logout(
             user_id,
-            request.headers.get("X-Forwarded-For", request.remote_addr),
+            request.remote_addr,
             request.headers.get("User-Agent", ""),
         )
         logout_user()

@@ -22,6 +22,7 @@ from ..db import (
     record_logout,
     record_security_event,
     user_has_role,
+    valid_password,
 )
 
 
@@ -284,7 +285,7 @@ def logout():
     if user_id:
         record_logout(
             user_id,
-            request.headers.get("X-Forwarded-For", request.remote_addr),
+            request.remote_addr,
             request.headers.get("User-Agent", ""),
         )
         logout_user()
@@ -298,6 +299,11 @@ def forgot_password():
         email = request.form.get("email", "").strip().lower()
         user = get_user_by_email(email)
 
+        # Always the same response (step="verify", same message) whether
+        # or not the email is registered -- an unknown email used to fall
+        # through to a different template step with a different message,
+        # which let /forgot-password be used to enumerate real accounts.
+        # The email is only actually sent when the account is real.
         if user:
             otp = create_email_otp(user["id"], OTP_PURPOSE_PASSWORD_RESET)
             send_password_reset_otp(user["email"], otp)
@@ -305,11 +311,9 @@ def forgot_password():
             # A fresh reset request must never inherit a stale "verified"
             # flag from an earlier completed/abandoned flow.
             session.pop("reset_verified", None)
-            flash("A reset code has been sent to your email. Please check your inbox.", "success")
-            return render_template("forgot_password.html", step="verify")
-        else:
-            flash("If this email exists in our system, you will receive a reset code.", "info")
-            return render_template("forgot_password.html")
+
+        flash("If this email exists in our system, you will receive a reset code.", "success")
+        return render_template("forgot_password.html", step="verify")
 
     return render_template("forgot_password.html")
 
@@ -361,8 +365,20 @@ def forgot_password_reset():
     if password != confirm_password:
         return render_template("forgot_password.html", step="reset", error="Passwords do not match.")
 
-    if len(password) < 8:
-        return render_template("forgot_password.html", step="reset", error="Password must be at least 8 characters long.")
+    # Must match the same policy registration and profile password-change
+    # enforce -- this path used to only require 8 characters with no
+    # complexity check, making it the weakest way to set an account's
+    # password despite requiring the same OTP-verified identity proof.
+    if not valid_password(password):
+        return render_template(
+            "forgot_password.html",
+            step="reset",
+            error=(
+                "Password must contain at least 12 characters, "
+                "one uppercase letter, one lowercase letter, "
+                "one number, and one special character."
+            ),
+        )
 
     reset_user_password(user_id, password)
     record_audit_log(
