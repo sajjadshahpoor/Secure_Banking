@@ -19,7 +19,12 @@ login_manager.session_protection = "strong"
 
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
+    # Raised from 200/day, 50/hour -- the 50/hour default was blocking
+    # normal red-team/blue-team testing traffic. The per-route limits on
+    # sensitive endpoints (login, register, OTP, password reset, etc.,
+    # each decorated individually in routes/auth.py) are unaffected by
+    # this and still apply.
+    default_limits=["200000 per day", "10000 per hour"]
 )
 
 talisman = Talisman()
