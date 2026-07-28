@@ -61,7 +61,7 @@ def _complete_login(user, mfa_verified: bool):
 
 
 @auth_bp.route("/login", methods=["GET","POST"])
-@limiter.limit("5 per minute")
+@limiter.limit("100 per minute")
 def login():
 
     if request.method == "POST":
@@ -105,7 +105,7 @@ def login():
 
 
 @auth_bp.route("/login/verify", methods=["GET", "POST"])
-@limiter.limit("5 per minute")
+@limiter.limit("100 per minute")
 def login_verify():
     user_id = session.get("pending_login_user_id")
     if not user_id:
@@ -163,7 +163,7 @@ def login_resend_otp():
     return redirect(url_for("auth.login_verify"))
 
 @auth_bp.route("/register", methods=["GET", "POST"])
-@limiter.limit("5 per minute")
+@limiter.limit("100 per minute")
 def register():
 
     if request.method == "POST":
@@ -224,7 +224,7 @@ def register():
 
 
 @auth_bp.route("/verify-email", methods=["GET", "POST"])
-@limiter.limit("5 per minute")
+@limiter.limit("100 per minute")
 def verify_email():
     user_id = session.get("pending_verification_user_id")
     if not user_id:
@@ -293,7 +293,7 @@ def logout():
     return redirect(url_for("main.home"))
 
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
-@limiter.limit("5 per minute")
+@limiter.limit("100 per minute")
 def forgot_password():
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
@@ -319,7 +319,7 @@ def forgot_password():
 
 
 @auth_bp.route("/forgot-password/verify", methods=["POST"])
-@limiter.limit("5 per minute")
+@limiter.limit("100 per minute")
 def forgot_password_verify():
     user_id = session.get("reset_user_id")
     if not user_id:
@@ -343,7 +343,7 @@ def forgot_password_verify():
 
 
 @auth_bp.route("/forgot-password/reset", methods=["POST"])
-@limiter.limit("5 per minute")
+@limiter.limit("100 per minute")
 def forgot_password_reset():
     user_id = session.get("reset_user_id")
 
