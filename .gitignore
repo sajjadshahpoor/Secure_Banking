@@ -21,4 +21,3 @@ banking_app/instance/
 nginx/certs/*.crt
 nginx/certs/*.key
 !nginx/certs/.gitkeep
-RED_TEAM_REPORT_CORRECTIONS.md
