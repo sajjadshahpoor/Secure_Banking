@@ -72,20 +72,7 @@
                                 {% set is_incoming = txn['sender_account_id'] not in owned_account_ids %}
                                 <tr>
                                     <td>{{ txn['created_at'][:16] }}</td>
-                                    {# ================================================================ #}
-                                    {# [CTF-VULN #2 - MEDIUM] Stored XSS via transaction description.     #}
-                                    {# The `|safe` filter below disables Jinja's automatic HTML escaping  #}
-                                    {# for this field, so a transfer description containing a script tag  #}
-                                    {# runs in the browser of anyone who later views this page (the       #}
-                                    {# recipient of the transfer, or the sender viewing their own         #}
-                                    {# history). Without |safe, Jinja would render it as inert text.      #}
-                                    {# TRIGGER: send a transfer with description set to e.g.               #}
-                                    {#   <script>alert(document.cookie)</script>                          #}
-                                    {# then view /transactions (or the dashboard) as the recipient.        #}
-                                    {# THE FIX (not applied here on purpose): remove the |safe filter, or  #}
-                                    {# sanitize/escape the description before storing it.                 #}
-                                    {# ================================================================ #}
-                                    <td>{{ (txn['description'] or txn['transaction_type']) | safe }}{% if is_self_transfer %} <span class="text-muted small">(between your accounts)</span>{% endif %}</td>
+                                    <td>{{ txn['description'] or txn['transaction_type'] }}{% if is_self_transfer %} <span class="text-muted small">(between your accounts)</span>{% endif %}</td>
                                     <td>{{ txn['transaction_type'] }}</td>
                                     <td class="fw-bold {{ 'text-muted' if is_self_transfer else ('text-success' if is_incoming else 'text-danger') }}">
                                         {% if is_self_transfer %}€{{ "{:.2f}".format(txn['amount']) }}{% else %}{{ '+' if is_incoming else '-' }}€{{ "{:.2f}".format(txn['amount']) }}{% endif %}

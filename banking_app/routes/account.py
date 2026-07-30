@@ -146,33 +146,12 @@ def transactions():
 @account_bp.route("/accounts/<account_id>")
 @login_required
 def view_account(account_id):
-    """
-    ================================================================
-    [CTF-VULN #1 - EASY] Insecure Direct Object Reference (IDOR)
-    ================================================================
-    This endpoint fetches an account purely by the id in the URL and
-    never checks that the account belongs to current_user -- any
-    authenticated user can view ANY other user's balance, IBAN, and
-    account number just by changing the id in the address bar.
+    """Show a single account's details -- only to the account's owner.
 
-    HOW TO TRIGGER:
-      1. Log in as any two test users (User A and User B) in two
-         browsers/sessions, each with at least one open account.
-      2. As User A, open the browser dev tools / view page source on
-         /dashboard and copy one of User A's own account ids (e.g.
-         from the "Copy" button's data-iban, or from a network
-         request -- account ids are UUIDs like
-         3a91f526-5132-473d-9cb6-70745ddd39bf).
-      3. As User B, visit /accounts/<User A's account id>.
-         -> User B now sees User A's real balance, IBAN, and account
-            number, despite it not being their own account.
-
-    THE FIX (not applied here on purpose): check
-      `if account["user_id"] != current_user.id: abort(403)`
-    before rendering, the same way every other account-scoped route
-    in this file already does via the owned_account_ids / next(...)
-    ownership pattern.
-    ================================================================
+    Fetches the account by id, then verifies account["user_id"] matches
+    current_user.id before rendering anything. A mismatch is logged as a
+    security event and rejected with 403, the same ownership pattern used
+    by every other account-scoped route in this file.
     """
     account = get_account_by_id(account_id)
     if account is None:
@@ -180,28 +159,23 @@ def view_account(account_id):
 
     is_owner = account["user_id"] == current_user.id
 
-    # [SOC DETECTION for CTF-VULN #1] The vulnerable code above already
-    # fetched and is about to render someone else's account -- this is
-    # the exact moment a real IDOR would be caught: the requesting user
-    # doesn't own the resource they're viewing. Logged as Critical so
-    # it stands out from routine activity on the SOC dashboard.
     if not is_owner:
         record_security_event(
             current_user.id,
-            "IDOR Exploit Detected - Unauthorized Account Access",
+            "IDOR Exploit Attempt Blocked - Unauthorized Account Access",
             "Critical",
             request.remote_addr,
             f"account:{account_id}",
             (
-                f"User {current_user.email} viewed account {account_id} "
-                f"(IBAN {account['iban']}) belonging to a different user "
-                f"via GET /accounts/<id> without any ownership check. "
-                f"CTF-VULN #1 (IDOR) was triggered."
+                f"User {current_user.email} attempted to view account {account_id} "
+                f"(IBAN {account['iban']}) belonging to a different user via "
+                f"GET /accounts/<id>. Blocked by the ownership check."
             ),
             "IDOR-Detector",
             "Open",
         )
         get_db().commit()
+        abort(403)
 
     owner = get_user_by_id(account["user_id"])
 
@@ -292,24 +266,23 @@ def transfer():
         recipient_name = (request.form.get("recipient") or "").strip()
         description = (request.form.get("description") or "").strip()
 
-        # [SOC DETECTION for CTF-VULN #2] The description below is stored
-        # as-is (no sanitization -- that's intentional, see the |safe
-        # filter in transactions.html marked CTF-VULN #2) and later
-        # rendered unescaped, so anyone who views this transaction has the
-        # payload execute in their browser. This check doesn't block or
-        # clean the input -- it only raises the alert a real SOC would
-        # generate on observing a payload like this in transit.
+        # The description is stored as-is and rendered with Jinja's default
+        # auto-escaping (transactions.html no longer applies |safe to it),
+        # so a payload here can't execute in the browser. Still flagged and
+        # logged on submission as a defense-in-depth signal -- worth a
+        # SOC look even though the render path itself is no longer
+        # exploitable.
         if description and re.search(r"<script|onerror\s*=|onload\s*=|javascript:|<iframe|<img[^>]+onerror", description, re.IGNORECASE):
             record_security_event(
                 current_user.id,
-                "Stored XSS Payload Detected in Transfer Description",
-                "High",
+                "Suspicious Script-Like Content in Transfer Description",
+                "Medium",
                 request.remote_addr,
                 "transfer",
                 (
                     f"Transaction memo submitted by {current_user.email} contains a likely "
-                    f"XSS payload and will be stored unsanitized: {description[:200]!r}. "
-                    f"CTF-VULN #2 (Stored XSS) was triggered."
+                    f"XSS payload: {description[:200]!r}. Stored as plain text and "
+                    f"auto-escaped on render, so it will not execute."
                 ),
                 "XSS-Detector",
                 "Open",
@@ -388,75 +361,25 @@ def transfer():
                 form=request.form,
             )
 
-        # ================================================================
-        # [CTF-VULN #3 - HARD] Business logic flaw: self-transfer money
-        # duplication.
-        # ================================================================
-        # When sender and receiver are two DIFFERENT accounts owned by the
-        # SAME user (a legitimate feature -- see the "between your
-        # accounts" labels in dashboard.html/transactions.html), this
-        # branch treats it as "just moving money between your own
-        # pockets" and skips debiting the sender, on the flawed
-        # assumption that no money is leaving the bank. The receiving
-        # account still gets credited, so repeating this between two of
-        # your own accounts creates money out of nowhere.
-        #
-        # HOW TO TRIGGER:
-        #   1. Open a Savings AND a Current account on the same profile
-        #      (dashboard -> "+ Open New Account").
-        #   2. Note your total balance (Savings + Current).
-        #   3. Transfer any amount from Savings to Current using its
-        #      IBAN and your own name as recipient.
-        #   4. Reload the dashboard -- your TOTAL balance went UP by the
-        #      transferred amount instead of staying the same. Repeat to
-        #      keep duplicating funds (capped only by the existing daily
-        #      transfer limit, since these still count as sent Transfers).
-        #
-        # THE FIX (not applied here on purpose): always debit the sender,
-        # i.e. delete the `if not is_internal_self_transfer:` guard below
-        # and unconditionally call update_account_balance(sender, -amount).
-        # ================================================================
-        is_internal_self_transfer = receiver_account["user_id"] == sender_account["user_id"]
-
-        if not is_internal_self_transfer:
-            # Atomic check-and-debit: the earlier balance check above reads
-            # a snapshot that could be stale by the time we get here if two
-            # transfers from the same account run concurrently. This single
-            # UPDATE re-checks the balance and debits in one statement, so
-            # a second concurrent transfer that would overdraw the account
-            # can't slip through between the check and the write.
-            if not debit_account_if_sufficient(sender_account["id"], amount):
-                flash("Insufficient balance for this transfer.", "danger")
-                return render_template(
-                    "transfer.html",
-                    accounts=accounts,
-                    recent_transactions=recent_transactions,
-                    owned_account_ids=owned_account_ids,
-                    form=request.form,
-                )
-        else:
-            # [SOC DETECTION for CTF-VULN #3] A legitimate internal
-            # transfer is balance-neutral for the user overall, so every
-            # occurrence of this path is logged -- the Blue Team can
-            # correlate a stream of these events against a user's total
-            # balance climbing to confirm the flaw is being actively
-            # abused, rather than just used for its intended purpose.
-            record_security_event(
-                current_user.id,
-                "Self-Transfer Detected - Verify Balance Integrity",
-                "Medium",
-                request.remote_addr,
-                "transfer",
-                (
-                    f"User {current_user.email} transferred EUR {amount:.2f} between their own "
-                    f"accounts ({sender_account['iban']} -> {receiver_account['iban']}). The sender "
-                    f"account was NOT debited due to the intentional CTF business-logic flaw "
-                    f"(CTF-VULN #3) -- repeated use of this path duplicates funds."
-                ),
-                "BusinessLogic-Detector",
-                "Open",
+        # Always debit the sender -- including when sender and receiver are
+        # two different accounts owned by the same user (moving money
+        # "between your own pockets" is still a real transfer out of the
+        # source account, not an exception to it). Atomic check-and-debit:
+        # the earlier balance check above reads a snapshot that could be
+        # stale by the time we get here if two transfers from the same
+        # account run concurrently. This single UPDATE re-checks the
+        # balance and debits in one statement, so a second concurrent
+        # transfer that would overdraw the account can't slip through
+        # between the check and the write.
+        if not debit_account_if_sufficient(sender_account["id"], amount):
+            flash("Insufficient balance for this transfer.", "danger")
+            return render_template(
+                "transfer.html",
+                accounts=accounts,
+                recent_transactions=recent_transactions,
+                owned_account_ids=owned_account_ids,
+                form=request.form,
             )
-            get_db().commit()
 
         update_account_balance(receiver_account["id"], amount)
 
